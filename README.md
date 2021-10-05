@@ -6,3 +6,7 @@ Detects the image sample (croix.png and trait.png)
 
 Neural network qui détecte si c'est une croix une ligne.
 Résultat fiable.
+
+Run nna.py to test.
+
+Lancez nna.py pour tester.
