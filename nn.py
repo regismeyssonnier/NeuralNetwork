@@ -315,7 +315,7 @@ def calc_output_sigmoid(inp, hw, hb, size_in, size_out):
 	out = []
 	
 	for o in range(size_out):
- 		ri = 0
+		ri = 0
 		for i in range(size_in):
 			ri += inp[i] * hw[i]
 			
