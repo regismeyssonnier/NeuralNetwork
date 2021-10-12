@@ -5,30 +5,27 @@ import math
 
 
 inputn = []
-size_input = 256
+size_input = 2500
 hidden = []
 hiddenw = []
 hiddenb = []
-nb_hidden = 3
-size_hidden = 768
-size_hidden2 = 192
-size_hidden3 = 30#100#44
-sz_hidden = [size_hidden, size_hidden2]#no 
-size_hidden_weight = [size_input, size_hidden]#no
-size_hidden_bias = [size_hidden, size_hidden2, size_hidden3]#use
+nb_hidden = 2
+size_hidden = 16
+size_hidden2 = 8
+sz_hidden = [size_hidden, size_hidden2]
+size_hidden_weight = [size_input, size_hidden]
+size_hidden_bias = [size_hidden, size_hidden2]
 
 output = []
 outputw = []
 outputb = []
-size_output = 3
+size_output = 2
 size_output_weight = size_hidden2
 size_output_bias = size_output
 LR = 0.1
 
 TEST = []
 TEST_out = []
-TESTV = []
-TESTV_out = []
 
 
 def test_proc(test, out):
@@ -177,11 +174,26 @@ def display_hidden_w(hid):
 
 def random_hidden(hid, szo, szw):
 
-		
+	"""
+	print("nb_hidden:" + str(nb_hidden))
+	for nb in range(nb_hidden):#2
+		for nh in range(len(sz_hidden)):
+			print("sz_hidden:" + str(sz_hidden[nh]))
+			for n in range(sz_hidden[nh]):#16
+				print(n)
+				w = []
+				print("size[n]:" + str(size[n]))
+				for i in range(size[n]):
+					w.append(random.random())
+
+				#hid.append(w)
+	"""
+
+	
 	for no in range(szo):
 		wl = []
 		for nw in range(szw):
-			wl.append(random.random()*0.02-0.01)
+			wl.append(random.random())
 
 		hid.append(wl)
 
@@ -195,7 +207,7 @@ def random_hidden_bias_RELU(hid, size):
 		w = []
 		for i in range(size[n]):
 			ns = random.random()
-			nb = random.random()
+			nb = random.random()*100
 			if ns > 5:
 				w.append(nb)
 			else:
@@ -214,11 +226,16 @@ def random_hidden_bias_sigmoid(hid, size):
 
 def random_output_w(hid, szo, szw):
 		
-		
+	"""w = []
+	for i in range(size):
+		w.append(random.random())
+
+	hid.append(w)"""
+	
 	for no in range(szo):
 		wl = []
 		for nw in range(szw):
-			wl.append(random.random()*0.02-0.01)
+			wl.append(random.random())
 
 		hid.append(wl)
 
@@ -227,7 +244,7 @@ def random_output_bias_sigmoid(hid, size):
 	
 	w = []
 	for i in range(size):
-		w.append(random.random())
+		w.append(random.random()*100)
 
 	hid.append(w)
 
@@ -241,11 +258,6 @@ def random_weight():
 	random_hidden(hiddenw[0], size_hidden, size_input)
 	hiddenw.append([])
 	random_hidden(hiddenw[1], size_hidden2, size_hidden)
-	hiddenw.append([])
-	random_hidden(hiddenw[2], size_hidden3, size_hidden2)
-	
-
-
 
 def display_hiddenb():
 	print("hidden bias")
@@ -263,7 +275,7 @@ def display_hiddeneuron():
 
 def random_outputw():
 	outputw.append([])
-	random_output_w(outputw[0], size_output, size_hidden2)
+	random_output_w(outputw[0], 2, size_hidden2)
 
 def display_outputw():
 	for h in outputw:
@@ -283,7 +295,7 @@ def display_outputb():
 
 def sigmoid(x):
 	#try:
-	#print("x=" + str(x))	
+		
 	return 1 / (1 + math.exp(-x))
 	"""except OverflowError:
 		print("x:" + str(x))
@@ -387,39 +399,14 @@ def derive(x):
 	return x * (1 - x)
 
 
-def hidden_backp(output, Loss, outputb, outputw, layer, size_out, size_in, mean):
-
-	for o in range(size_out):
-		d = derive(output[o])
-		db = LR * Loss[o]* d
-		#db2 = LR * mean* d
-		outputb[o] -=  db 
-		for i in range(size_in):
-			outputw[o][i] -= db * layer[i]
-
-def hidden_backp2(output, Loss, outputb, outputw, layer, size_out, size_in):
-
-	for o in range(size_out):
-		d = derive(output[o])
-		db = LR * Loss[o] 
-		outputb[o] =  db * d
-		for i in range(size_in):
-			outputw[o][i] = db * layer[o]
 
 
 
-def Loss_func(Loss2, size, layer, size_l):
-	
-	Loss3 = []
-	err = 0
-	for e in range(size):
-		err += Loss2[e]
-	err = err / size
-	for o in range(size_l):
-		Loss3.append( err * layer[o] )
 
 
-	return Loss3
+
+
+
 
 
 

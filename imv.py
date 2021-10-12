@@ -201,7 +201,7 @@ def create_valid_tab():
 	return testv
 	
 
-TEST, TEST_out = create_test_tab()
+#TEST, TEST_out = create_test_tab()
 TESTV = create_valid_tab()
 
 """
