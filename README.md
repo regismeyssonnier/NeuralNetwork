@@ -12,3 +12,6 @@ Décompressez archive.zip pour les image
 Run nna.py to test.
 
 Lancez nna.py pour tester.
+
+If it doesn't run try to download archive.zip to
+https://www.kaggle.com/chetankv/dogs-cats-images
