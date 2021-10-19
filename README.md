@@ -1,11 +1,13 @@
 # NeuralNetwork
 
 
-Neural network who  detects if it's a cross or line.
-Detects the image sample (croix.png and trait.png)
+Neural network who  detects if it's a cat or dog.
+Detects the image sample (archive.zip)
+Decompress the archive.zip to find the image to train and test
 
-Neural network qui détecte si c'est une croix une ligne.
-Résultat fiable.
+Neural network qui détecte si c'est un chat ou un chien.
+
+Décompressez archive.zip pour les image
 
 Run nna.py to test.
 
