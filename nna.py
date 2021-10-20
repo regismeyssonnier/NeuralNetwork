@@ -134,36 +134,8 @@ while not stop:
 		maxi = output[0][o]"""
 
 	#print("---------------------------------------------------")
-	"""if output[0][1] > output[0][0]:
-		AVG = output[0][1] - output[0][0]
-	else:
-		AVG = output[0][0] - output[0][1]
-	print("AVG:" + str(AVG) + " epoch:" + str(E) + " I:" + str(I+1))"""
-
-	"""if TEST_out[I] == -1:
-		print("output hid2 out")
-		print(h)
-		print("C'est un ZOB")
-		cnt = 0
-		if reso == 1:
-			TEST_out[I] = 2
-		elif reso == 2:
-			TEST_out[I] = 1
-	"""
-	"""if TEST_out[I] == reso : 
-	#if (output[0][0] <= (output[0][1] + 0.01)) and (output[0][0] >= (output[0][1] - 0.01)):
-		print("output hid2 out")
-		print(h)
-		print(str(W) + " - " + str(I+1) + "=test_out:" + name + " - " + str(cnt+1))
-		if reso == 1:
-			print("C'est une cat")
-		elif reso == 2:
-			print("C'est un chienne")
-		elif reso == 3:
-			print("C'est un cercle")
-
-		cnt = 0"""
-
+		
+	
 	print(str(W) + " - " + str(I+1) + "=test_out:" + name + " - " + str(cnt+1))
 	
 
