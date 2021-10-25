@@ -7,13 +7,11 @@ Decompress the archive.zip to find the image to train and test
 
 Neural network qui détecte si c'est un chat ou un chien.
 
-Décompressez archive.zip pour les image
-
 Run nna.py to test or nnpa.py for other version.
 
 Lancez nna.py pour tester ou nnpa.py pour l'autre version.
 
-If it doesn't run try to download archive.zip to
+DOWNLOAD archive.zip to
 https://www.kaggle.com/chetankv/dogs-cats-images
 
 need to rename the image in test_set file: cat.1.jpg to cat.1000.jpg and the same for the dog
