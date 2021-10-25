@@ -7,11 +7,11 @@ incN2 = 0
 
 MAX_I = 40
 MAX_IM_C = 20
-MAX_RAND = 100
+MAX_RAND = 1000
 
-testd = "archive/dog vs cat/dataset/test_set/dogs/dog"
-testc = "archive/dog vs cat/dataset/test_set/cats/cat"
-trainc ="archive/dog vs cat/dataset/training_set/cats/cat" 
+testd = "archive/dog vs cat/dataset/test_set/dogs/dog."
+testc = "archive/dog vs cat/dataset/test_set/cats/cat."
+trainc ="archive/dog vs cat/dataset/training_set/cats/cat." 
 traind ="archive/dog vs cat/dataset/training_set/dogs/dog." 
 PATH = [testc, testd]
 PN = []

@@ -9,13 +9,14 @@ size_input = 256
 hidden = []
 hiddenw = []
 hiddenb = []
-nb_hidden = 3
+nb_hidden = 4
 size_hidden = 64
-size_hidden2 = 64
-size_hidden3 = 64#30#100#44
+size_hidden2 = 32
+size_hidden3 = 16#30#100#44
+size_hiddenf = 8
 sz_hidden = [size_hidden, size_hidden2]#no 
 size_hidden_weight = [size_input, size_hidden]#no
-size_hidden_bias = [size_hidden, size_hidden2, size_hidden3]#use
+size_hidden_bias = [size_hidden, size_hidden2, size_hidden3, size_hiddenf]#use
 
 output = []
 outputw = []
@@ -243,7 +244,8 @@ def random_weight():
 	random_hidden(hiddenw[1], size_hidden2, size_hidden)
 	hiddenw.append([])
 	random_hidden(hiddenw[2], size_hidden3, size_hidden2)
-	
+	hiddenw.append([])
+	random_hidden(hiddenw[3], size_hiddenf, size_hidden3)
 
 
 
@@ -263,7 +265,7 @@ def display_hiddeneuron():
 
 def random_outputw():
 	outputw.append([])
-	random_output_w(outputw[0], size_output, size_hidden3)
+	random_output_w(outputw[0], size_output, size_hiddenf)
 
 def display_outputw():
 	for h in outputw:
@@ -310,30 +312,30 @@ def tanh(x):
 #***********************************************************************************
 
 def calc_output_sigmoid(inp, hw, hb, size_in, size_out):
-	out = []
-	
-	for o in range(size_out):
- 		ri = 0
-		for i in range(size_in):
-			ri += inp[i] * hw[i]
-			
-		out.append( sigmoid( ri + hb[o] ) )
+    out = []
+
+    for o in range(size_out):
+        ri = 0
+        for i in range(size_in):
+            ri += inp[i] * hw[i]
+            
+        out.append( sigmoid( ri + hb[o] ) )
 
 
-	return out
+    return out
 
 def calc_output_RELU(inp, hw, hb, size_in, size_out):
-	out = []
-	
-	for o in range(size_out):
- 		ri = 0
-		for i in range(size_in):
-			ri += inp[i] * hw[i]
-			
-		out.append( RELU( ri + hb[o] ) )
+    out = []
+
+    for o in range(size_out):
+        ri = 0
+        for i in range(size_in):
+            ri += inp[i] * hw[i]
+            
+        out.append( RELU( ri + hb[o] ) )
 
 
-	return out
+    return out
 
 def calc_output_sa(inp, hw, hb, size_in, size_out):
 	out = []
@@ -349,13 +351,13 @@ def calc_output_sa(inp, hw, hb, size_in, size_out):
 	return out
 
 def calc_output_sigmoid2(inp, hw, hb, size_in, size_out):
-	out = []
-	nbmax = 0
-	if(size_out < 4):
-		nbmax = 1.0
-	else:
-		nbmax = size_out * 0.9
-	
+        out = []
+        nbmax = 0
+        if(size_out < 4):
+            nbmax = 1.0
+        else:
+            nbmax = size_out * 0.9
+
         nb = 0
         for o in range(size_out):
             ri = 0
@@ -370,7 +372,7 @@ def calc_output_sigmoid2(inp, hw, hb, size_in, size_out):
             else:"""
             out.append( sigmoid( ri + hb[o] ) )#
 
-	return out
+        return out
 
 def calc_output_sigmoid3(inp, hw, hb, size_in, size_out):
 	out = []
@@ -533,13 +535,30 @@ def hidden_backp3(output, Loss, LRL,  outputb, outputw, layer, size_l, size_out,
 					outputw[o][i] -= db / (math.sqrt(g + 0.0000001)) * layer[i]"""
 				outputw[o][i] += db 
 				
+
+def hidden_backp41(alm1, cost, output, outputw, outputb, size_c, size_out, size_in):
+        DW = []
+        for c in range(size_c):
+            #for o in range(size_out):
+            d = derive(output[c])
+            db = d * 2 * cost[c]
+            outputb[c] -=  LR * db #+ random.random()
+                            
+            for i in range(size_in):
+                
+                
+                dw = alm1[i] * d * 2 * cost[c]
+                
+                outputw[c][i] -= LR* dw
+
+
 def hidden_backp4(alm1, cost, output, outputw, outputb, size_c, size_out, size_in):
-    
+        DW = []
         for c in range(size_c):
             for o in range(size_out):
                 d = derive(output[o])
                 db = d * 2 * cost[c]
-                outputb[o] +=  LR * db #+ random.random()
+                outputb[o] -=  LR * db #+ random.random()
                 
                 nb = 0
                 nbmax = 0
@@ -548,19 +567,206 @@ def hidden_backp4(alm1, cost, output, outputw, outputb, size_c, size_out, size_i
                 else:
                     nbmax = size_in * 0.25
                 for i in range(size_in):
-                    r = random.random() * 10
-                    if (r < 2.5) and (nb < nbmax):
+                    r = random.random()
+                    if (r <= 0.25) and (nb < nbmax):
                         nb += 1
                         alm1[i] = 0
                     
                     dw = alm1[i] * d * 2 * cost[c]
-                    g = s = 0
+                    
+                    outputw[o][i] -= LR* dw
+
+def hidden_backp4stmom(alm1, cost, output, outputw, outputb, size_c, size_out, size_in):
+        DW = []
+        for c in range(size_c):
+            for o in range(size_out):
+                d = derive(output[o])
+                db = d * 2 * cost[c]
+                outputb[o] -=  LR * db #+ random.random()
+                
+                nb = 0
+                nbmax = 0
+                if(size_in < 4):
+                    nbmax = 1.0
+                else:
+                    nbmax = size_in * 0.25
+                for i in range(size_in):
+                    """r = random.random()
+                    if (r <= 0.25) and (nb < nbmax):
+                        nb += 1
+                        alm1[i] = 0"""
+                    
+                    vx = 0
+                    x = alm1[i]
+                    if x != 0:
+                        for m in range(2):
+                            dw = x * d * 2 * cost[c]
+                            if dw == 0:
+                                break
+                            vx = 0.9 * vx + dw     
+                            x += LR * vx
+                        #print(str(x) + " - " + str(alm1[i] * d * 2 * cost[c]))
+                    
+                        outputw[o][i] += x
+                                           
+                    #else:
+                     #   outputw[o][i] -= LR * alm1[i] * d * 2 * cost[c]
+                    
+
+def hidden_backp4mom(alm1, cost, output, outputw, outputb, size_c, size_out, size_in, dwm1):
+        DW = []
+        for c in range(size_c):
+            for o in range(size_out):
+                d = derive(output[o])
+                db = d * 2 * cost[c]
+                outputb[o] -=  LR * db #+ random.random()
+                
+                nb = 0
+                nbmax = 0
+                if(size_in < 4):
+                    nbmax = 1.0
+                else:
+                    nbmax = size_in * 0.25
+                for i in range(size_in):
+                    r = random.random()
+                    if (r <= 0.25) and (nb < nbmax):
+                        nb += 1
+                        alm1[i] = 0
+                    
+                    dw = alm1[i] * d * 2 * cost[c]
+                    if len(dwm1) == 0:
+                        DW.append(dw)
+                    else:
+                        DW.append(dw  + 0.7 * dwm1[(c * size_c *size_out) + o * size_out + i])
+                    """g = s = 0
                     for W in range(10):
-                        """g = 0.95 * g + (1 - 0.95) * dw * dw
+                       g = 0.95 * g + (1 - 0.95) * dw * dw
                         s -= dw / (math.sqrt(g + 0.0000001)) * alm1[i]"""
-                    outputw[o][i] += LR* dw 
+                    if len(dwm1) != 0:
+                        outputw[o][i] -= LR* (dw + 0.7 * dwm1[(c * size_c *size_out) + o * size_out + i])
+                    else:
+                        outputw[o][i] -= LR* dw
+                    
+        return DW
+
+
+                    
+def hidden_backp4nest(alm1, cost, output, outputw, outputb, size_c, size_out, size_in):
+        DW = []
+        for c in range(size_c):
+            for o in range(size_out):
+                d = derive(output[o])
+                db = d * 2 * cost[c]
+                outputb[o] -=  LR * db #+ random.random()
+                
+                nb = 0
+                nbmax = 0
+                if(size_in < 4):
+                    nbmax = 1.0
+                else:
+                    nbmax = size_in * 0.25
+                for i in range(size_in):
+                    r = random.random()
+                    if (r <= 0.25) and (nb < nbmax):
+                        nb += 1
+                        alm1[i] = 0
+                    
+                    
+                    v = 0
+                    old_v = v
+                    rho = 0.9
+                    x = alm1[i]
+                    
+                    for n in range(5):
+                        dw = x * d * 2 * cost[c]
+                        v = rho * v - LR * dw
+                        x += -rho * old_v + (1 + rho) * v
+                    
+                    outputw[o][i] -= x
+
+def hidden_backp4rms(alm1, cost, output, outputw, outputb, size_c, size_out, size_in):
+        DW = []
+        for c in range(size_c):
+            for o in range(size_out):
+                d = derive(output[o])
+                db = d * 2 * cost[c]
+                outputb[o] -=  LR * db #+ random.random()
+                
+                nb = 0
+                nbmax = 0
+                if(size_in < 4):
+                    nbmax = 1.0
+                else:
+                    nbmax = size_in * 0.25
+                for i in range(size_in):
+                    """r = random.random()
+                    if (r <= 0.25) and (nb < nbmax):
+                        nb += 1
+                        alm1[i] = 0"""
+                    
+                    
+                    grad_squared = 0
+                    x = alm1[i]
+                    
+                    for n in range(5):
+                        dw = x * d * 2 * cost[c]
+                        grad_squared = 0.99 * grad_squared + (1 - 0.99) * dw * dw
+                        x -= LR * dw / (math.sqrt(grad_squared) + 0.0000001)
+                    
+                    outputw[o][i] -= x
+                    
+                  
+                   
+                    
+def hidden_backp51(alm1, cost, output, outputw, outputb, size_c, size_out, size_in):
     
-				
+        
+    
+        etot = []
+        for c in range(size_c):
+            #for o in range(size_out):
+            d = derive(output[c])
+            db = d * cost[c]
+            
+            dedouto1 = cost[c]
+            douto1dnet01 = d
+            
+            outputb[c] -=  LR * db #+ random.random()
+            etot.append(db)
+            
+            for i in range(size_in):
+                
+                
+                dw = alm1[i] * d  * cost[c]
+                
+                outputw[c][i] -= LR* dw
+                
+        return etot
+                    
+def hidden_backp52(alm1, cost, etot, output, outputwp1, size_outp1, outputw, outputb, size_c, size_out, size_in):
+    
+       
+        
+        et = []                    
+        db = 0
+        for o in range(size_out):
+            
+            etotal = 0
+            #for wi in range(size_inp1):
+            for wo in range(size_outp1):
+            #
+                etotal += etot[wo] * outputwp1[wo][o]
+                
+            d = derive(output[o])
+                        
+            outputb[o] -=  LR * d * etotal #+ random.random()
+            et.append(etotal*d)
+            for i in range(size_in):
+                db = d * alm1[i]
+                outputw[o][i] -= LR * etotal * db
+                
+        return et
+                
 
 def Loss_func(Loss2, size, layer, size_l):
 	

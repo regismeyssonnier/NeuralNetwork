@@ -483,7 +483,7 @@ def create_test_tab_one_filter_rand_valid():
         test_out.append(n[0])
 
 
-    return test, test_out
+    return test, test_out, path
 
 def create_test_tab_one_filter_rand_train():	
 
@@ -500,11 +500,11 @@ def create_test_tab_one_filter_rand_train():
         test_out.append(n[0])
 
 
-    return test, test_out
+    return test, test_out, path
 
-TEST, TEST_out = create_test_tab_one_filter_rand_train()
+TEST, TEST_out, PATH = create_test_tab_one_filter_rand_train()
 # TEST, TEST_out = create_test_tab_filter()
-TESTV, TESTV_out = create_test_tab_one_filter_rand_valid()
+TESTV, TESTV_out, PATHV = create_test_tab_one_filter_rand_valid()
 #TESTV, TESTV_out = create_valid_tab_filter()
 
 """

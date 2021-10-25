@@ -1,7 +1,9 @@
 from nn import *
 from im import *
 from save import *
+import time
 
+start_time = time.time()
 
 #display_TEST()
 
@@ -59,6 +61,12 @@ THRP = 0
 JM = JB = 0
 l = 0
 lp = 0
+dw1 = []
+dw2 = []
+dw3 = []
+dw4 = []
+dw5 = []
+NORM = 0.001
 
 while not stop:
 	
@@ -66,7 +74,7 @@ while not stop:
 	
 	if change_in:
 		inputn = test2inputn(TEST[I])
-		inputn = BN(inputn, size_input, 0.001)
+		inputn = BN(inputn, size_input, NORM)
 		Dropout_input(inputn)
 		change_in = False
 	#print("l:"+str(len(inputn)))
@@ -91,11 +99,17 @@ while not stop:
 	#print("output hid1 hid2")
 	#print(h)
 	hidden.append(h);
+	
+	h = []
+	h = calc_output_RELU2(hidden[2], hiddenw[3], hiddenb[3], size_hidden3, size_hiddenf)
+	#print("output hid1 hid2")
+	#print(h)
+	hidden.append(h);
 
 	#print("/////////////////////////////////////////////////////////////////")
 	output = []
 	h = []
-	h = calc_output_RELUF(hidden[2], outputw[0], outputb[0], size_hidden3, size_output_bias)
+	h = calc_output_RELUF(hidden[3], outputw[0], outputb[0], size_hiddenf, size_output_bias)
 	#print("output hid2 out")
 	#print(h)
 	output.append(h);
@@ -134,8 +148,27 @@ while not stop:
 		maxi = output[0][o]"""
 
 	#print("---------------------------------------------------")
-		
+	"""if output[0][1] > output[0][0]:
+		AVG = output[0][1] - output[0][0]
+	else:
+		AVG = output[0][0] - output[0][1]
+	print("AVG:" + str(AVG) + " epoch:" + str(E) + " I:" + str(I+1))"""
+
 	
+	"""if TEST_out[I] == reso : 
+	#if (output[0][0] <= (output[0][1] + 0.01)) and (output[0][0] >= (output[0][1] - 0.01)):
+		print("output hid2 out")
+		print(h)
+		print(str(W) + " - " + str(I+1) + "=test_out:" + name + " - " + str(cnt+1))
+		if reso == 1:
+			print("C'est une cat")
+		elif reso == 2:
+			print("C'est un chienne")
+		elif reso == 3:
+			print("C'est un cercle")
+
+		cnt = 0"""
+
 	print(str(W) + " - " + str(I+1) + "=test_out:" + name + " - " + str(cnt+1))
 	
 
@@ -145,6 +178,7 @@ while not stop:
 	outp = 0
 	Loss = []
 	cost = []
+	cost2 = []
 	LRL = []
 	#y = []
 	THRP = THR
@@ -152,54 +186,32 @@ while not stop:
 	JM = JB = 0
 	for o in range(size_output):
 		if o == (TEST_out[I]-1):
-			#Loss.append( output[0][o] * math.log(0.9) + (1-output[0][o])*math.log(1-0.9)  )
-			#Loss.append( (0.33 - output[0][o])*2  )
+			
 			Loss.append( (1.0 - output[0][o])  )
 			LRL.append(0.9)
-			cost.append(output[0][o] - 1.0)
-			#Loss.append(-math.exp(1.0) / output[0][o])
-			"""if avg != 0.0:
-				Loss.append( (1.0 - output[0][o]/avg)*5.0  )
-				print("++" + str((1.0 - output[0][o]/avg)*5.0))
-			else:
-				Loss.append( 1.0  )"""
+			cost.append(output[0][o] - 0.99)
+			cost2.append(- (1.0 - output[0][o]) )
 			print("++" + str( (1.0 - output[0][o]) ))
 			#print("++" + str( (1.0 - output[0][o])*10.0 ))
 			l += ( ((1 - output[0][o])*(1 - output[0][o])) )
 			THR = 1.0 - output[0][o]
 		
-			JB += 1.0 - output[0][o]
+			
 			outp = output[0][o]
 			#y.append(0.99)
 		else:
 			l += ( ((0 - output[0][o])*(0 - output[0][o])) )
 			Loss.append( - output[0][o] )  # * -output[0][o])/2 )
 			LRL.append(0.9)
-			cost.append(output[0][o])
-			#Loss.append(-math.exp(0.0) / output[0][o])
-			"""if avg != 0.0:
-				Loss.append( ( - (output[0][o]-0.1)/avg)  )
-				print("--" + str( - (output[0][o]-0.1)/avg))
-			else:
-				Loss.append( 0.0  )"""
+			cost.append(output[0][o] - 0.01)
+			cost2.append(- (0.0 - output[0][o]) )
 			print("--" + str( - output[0][o]))
-			JB +=  - output[0][o]
-			#Loss.append( output[0][o] * math.log(0.1) + (1-output[0][o])*math.log(1-0.1)  )
-			#y.append(0.01)
-		
-		"""if output[0][o] > 0.5:
-			Loss.append( (1.0 - output[0][o])  )
-		else:
-			Loss.append( (0.0 - output[0][o]) )"""
+			
+			
 	
 	l /= size_output
 	
-	for i in range(size_hidden3):
-		JM += hidden[2][i] 
-	
-	JM *= JB
-	JM *= (2 / size_output)
-	JB *= (2 / size_output)
+
 	
 	#print("ERROR = " + str(l) + " I:" + str(I+1) + " E:" + str(E))
 	#print("THR:" + str(THR))
@@ -242,10 +254,52 @@ while not stop:
 	
 	#hidden_backp4(alm1, cost, output, outputw, outputb, size_out, size_in):
 	
-        hidden_backp4(hidden[2], cost, output[0], outputw[0], outputb[0], size_output, size_output, size_hidden3)
-        hidden_backp4(hidden[1], cost, hidden[2], hiddenw[2], hiddenb[2], size_output, size_hidden3, size_hidden2)
-        hidden_backp4(hidden[0], cost, hidden[1], hiddenw[1], hiddenb[1], size_output, size_hidden2, size_hidden)
-        hidden_backp4(inputn, cost, hidden[0], hiddenw[0], hiddenb[0], size_output, size_hidden, size_input)
+	backprop = 1
+	if backprop == 1:
+		hidden_backp41(hidden[3], cost, output[0], outputw[0], outputb[0], size_output, size_output, size_hiddenf)
+		hidden_backp4(hidden[2], cost, hidden[3], hiddenw[3], hiddenb[3], size_output, size_hiddenf, size_hidden3)
+		hidden_backp4(hidden[1], cost, hidden[2], hiddenw[2], hiddenb[2], size_output, size_hidden3, size_hidden2)
+		hidden_backp4(hidden[0], cost, hidden[1], hiddenw[1], hiddenb[1], size_output, size_hidden2, size_hidden)
+		hidden_backp4(inputn, cost, hidden[0], hiddenw[0], hiddenb[0], size_output, size_hidden, size_input)
+		
+	elif backprop == 2:
+		dw1 = hidden_backp4mom(hidden[3], cost, output[0], outputw[0], outputb[0], size_output, size_output, size_hiddenf, dw1)
+		dw2 = hidden_backp4mom(hidden[2], cost, hidden[3], hiddenw[3], hiddenb[3], size_output, size_hiddenf, size_hidden3, dw2)
+		dw3 = hidden_backp4mom(hidden[1], cost, hidden[2], hiddenw[2], hiddenb[2], size_output, size_hidden3, size_hidden2, dw3)
+		dw4 = hidden_backp4mom(hidden[0], cost, hidden[1], hiddenw[1], hiddenb[1], size_output, size_hidden2, size_hidden, dw4)
+		dw5 = hidden_backp4mom(inputn, cost, hidden[0], hiddenw[0], hiddenb[0], size_output, size_hidden, size_input, dw5)
+		
+	elif backprop == 3:
+		hidden_backp4stmom(hidden[3], cost, output[0], outputw[0], outputb[0], size_output, size_output, size_hiddenf)
+		hidden_backp4stmom(hidden[2], cost, hidden[3], hiddenw[3], hiddenb[3], size_output, size_hiddenf, size_hidden3)
+		hidden_backp4stmom(hidden[1], cost, hidden[2], hiddenw[2], hiddenb[2], size_output, size_hidden3, size_hidden2)
+		hidden_backp4stmom(hidden[0], cost, hidden[1], hiddenw[1], hiddenb[1], size_output, size_hidden2, size_hidden)
+		hidden_backp4stmom(inputn, cost, hidden[0], hiddenw[0], hiddenb[0], size_output, size_hidden, size_input)
+		
+	elif backprop == 4:
+		hidden_backp41(hidden[3], cost, output[0], outputw[0], outputb[0], size_output, size_output, size_hiddenf)
+		hidden_backp4nest(hidden[2], cost, hidden[3], hiddenw[3], hiddenb[3], size_output, size_hiddenf, size_hidden3)
+		hidden_backp4nest(hidden[1], cost, hidden[2], hiddenw[2], hiddenb[2], size_output, size_hidden3, size_hidden2)
+		hidden_backp4nest(hidden[0], cost, hidden[1], hiddenw[1], hiddenb[1], size_output, size_hidden2, size_hidden)
+		hidden_backp4nest(inputn, cost, hidden[0], hiddenw[0], hiddenb[0], size_output, size_hidden, size_input)
+		
+	elif backprop == 5:
+		hidden_backp4rms(hidden[3], cost, output[0], outputw[0], outputb[0], size_output, size_output, size_hiddenf)
+		hidden_backp4rms(hidden[2], cost, hidden[3], hiddenw[3], hiddenb[3], size_output, size_hiddenf, size_hidden3)
+		hidden_backp4rms(hidden[1], cost, hidden[2], hiddenw[2], hiddenb[2], size_output, size_hidden3, size_hidden2)
+		hidden_backp4rms(hidden[0], cost, hidden[1], hiddenw[1], hiddenb[1], size_output, size_hidden2, size_hidden)
+		hidden_backp4rms(inputn, cost, hidden[0], hiddenw[0], hiddenb[0], size_output, size_hidden, size_input)
+		
+	elif backprop == 6:
+		etot = hidden_backp51(hidden[3], cost, output[0], outputw[0], outputb[0], size_output, size_output, size_hiddenf)
+
+
+	#hidden_backp52(alm1, cost, etot, output, outputwp1, size_outp1, outputw, outputb, size_c, size_out, size_in):
+
+		etot = hidden_backp52(hidden[2], cost, etot, hidden[3], outputw[0], size_output,  hiddenw[3], hiddenb[3], size_output, size_hiddenf, size_hidden3)
+		etot = hidden_backp52(hidden[1], cost, etot, hidden[2], hiddenw[3], size_hiddenf,  hiddenw[2], hiddenb[2], size_output, size_hidden3, size_hidden2)
+		etot = hidden_backp52(hidden[0], cost, etot, hidden[1], hiddenw[2], size_hidden3, hiddenw[1], hiddenb[1], size_output, size_hidden2, size_hidden)
+		etot = hidden_backp52(inputn, cost, etot, hidden[0], hiddenw[1], size_hidden2,  hiddenw[0], hiddenb[0], size_output, size_hidden, size_input)
 
 	"""
 	hidden_backp2(output[0], Loss, outputb[0], outputw[0], output[0], size_output, size_hidden3)
@@ -276,12 +330,12 @@ while not stop:
 	#if l <= 0.10:
     
 
-        I += 1
-        change_in = True
+	I += 1
+	change_in = True
 
 
-        cnt = 0	
-        E = 0		
+	cnt = 0	
+	E = 0		
 		
 	if I == len(TEST):
 		I = 0
@@ -341,7 +395,7 @@ while not stop:
 
 	if change_in:
 		inputn = test2inputn(TESTV[I])
-		inputn = BN(inputn, size_input, 0.001)
+		inputn = BN(inputn, size_input, NORM)
 		Dropout_input(inputn)
 		change_in = False
 	#print("l:"+str(len(inputn)))
@@ -366,15 +420,22 @@ while not stop:
 	#print("output hid1 hid2")
 	#print(h)
 	hidden.append(h);
+	
+	h = []
+	h = calc_output_RELU2(hidden[2], hiddenw[3], hiddenb[3], size_hidden3, size_hiddenf)
+	#print("output hid1 hid2")
+	#print(h)
+	hidden.append(h);
 
+	#print("/////////////////////////////////////////////////////////////////")
 	output = []
 	h = []
-	h = calc_output_RELUF(hidden[2], outputw[0], outputb[0], size_hidden3, size_output_bias)
+	h = calc_output_RELUF(hidden[3], outputw[0], outputb[0], size_hiddenf, size_output_bias)
 	#print("output hid2 out")
 	#print(h)
 	output.append(h);
 
-		
+	
 	maxi = -1
 	resom = -1
 	for o in range(size_output):
@@ -561,7 +622,7 @@ while not stop:
 
     if change_in:
         inputn = test2inputn(TESTV[I])
-        inputn = BN(inputn, size_input, 0.001)
+        inputn = BN(inputn, size_input, NORM)
         change_in = False
     #print("l:"+str(len(inputn)))
     #display_inputn(inputn)
@@ -585,15 +646,23 @@ while not stop:
     #print("output hid1 hid2")
     #print(h)
     hidden.append(h);
+    
+    
+    h = []
+    h = calc_output_RELU3(hidden[2], hiddenw[3], hiddenb[3], size_hidden3, size_hiddenf)
+    #print("output hid1 hid2")
+    #print(h)
+    hidden.append(h);
 
+    #print("/////////////////////////////////////////////////////////////////")
     output = []
     h = []
-    h = calc_output_RELUF(hidden[2], outputw[0], outputb[0], size_hidden3, size_output_bias)
+    h = calc_output_RELUF(hidden[3], outputw[0], outputb[0], size_hiddenf, size_output_bias)
     #print("output hid2 out")
     #print(h)
     output.append(h);
 
-        
+           
     maxi = -1
     resom = -1
     for o in range(size_output):
@@ -746,3 +815,6 @@ elif resoF2 == 3:
     print("Algo MINMIN = Resultat:" + str(score3) + "/" + str(nbcat+nbdog) + " soit " + str(pct3) + "%")
 elif resoF2 == 4:	
     print("Algo MAXMIN = Resultat:" + str(score4) + "/" + str(nbcat+nbdog) + " soit " + str(pct4) + "%")
+    
+duration = time.time() - start_time 
+print("duree : " + str(duration) + " s")
