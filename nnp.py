@@ -22,6 +22,12 @@ hidden.append(np.zeros(size_hidden2))
 hidden.append(np.zeros(size_hidden3))
 hidden.append(np.zeros(size_hiddenf))
 
+hidden2 = []
+hidden2.append(np.zeros(size_hidden))
+hidden2.append(np.zeros(size_hidden2))
+hidden2.append(np.zeros(size_hidden3))
+hidden2.append(np.zeros(size_hiddenf))
+
 #print(hidden)
 
 hiddenw = []
@@ -30,14 +36,24 @@ hiddenw.append(np.random.random((size_hidden2, size_hidden))-0.5)
 hiddenw.append(np.random.random((size_hidden3, size_hidden2))-0.5)
 hiddenw.append(np.random.random((size_hiddenf, size_hidden3))-0.5)
 #print(hiddenw)
-
+hiddenw2 = []
+hiddenw2.append(np.zeros((size_hidden, size_input)))
+hiddenw2.append(np.zeros((size_hidden2, size_hidden)))
+hiddenw2.append(np.zeros((size_hidden3, size_hidden2)))
+hiddenw2.append(np.zeros((size_hiddenf, size_hidden3)))
 
 hiddenb = []
-hiddenb.append(np.random.random(size_hidden)*0.02-0.01)
-hiddenb.append(np.random.random(size_hidden2)*0.02-0.01)
-hiddenb.append(np.random.random(size_hidden3)*0.02-0.01)
-hiddenb.append(np.random.random(size_hiddenf)*0.02-0.01)
+hiddenb.append(np.random.random(size_hidden)*0.1)
+hiddenb.append(np.random.random(size_hidden2)*0.1)
+hiddenb.append(np.random.random(size_hidden3)*0.1)
+hiddenb.append(np.random.random(size_hiddenf)*0.1)
 #print(hiddenb)
+
+hiddenb2 = []
+hiddenb2.append(np.zeros(size_hidden))
+hiddenb2.append(np.zeros(size_hidden2))
+hiddenb2.append(np.zeros(size_hidden3))
+hiddenb2.append(np.zeros(size_hiddenf))
 
 sz_hidden = [size_hidden, size_hidden2]#no 
 size_hidden_weight = [size_input, size_hidden]#no
@@ -49,12 +65,19 @@ size_output_bias = size_output
 
 output = []
 output.append(np.zeros(size_output))
+output2 = []
+output2.append(np.zeros(size_output))
+
 outputw = []
-outputw.append(np.random.random((size_output, size_hiddenf))-0.5)
+outputw.append(np.random.random((size_output, size_hiddenf))*0.5)
+outputw2 = []
+outputw2.append(np.zeros((size_output, size_hiddenf)))
 
 outputb = []
-outputb.append(np.random.random(size_output)*0.02-0.01)
+outputb.append(np.random.random(size_output)*0.1)
 #print(outputb)
+outputb2 = []
+outputb2.append(np.zeros(size_output))
 
 LR = 0.0009
 
@@ -73,14 +96,14 @@ def test2inputn(test, inp):
         inp[I] = t
         I += 1
     #return inp
-
+    #display_test(inp, 1)
 def display_test(test, out):
 
 	print("output :  " + str(out))
 	for i in range(16):
 		d = ''
 		for j in range(16):
-			d += str(int(test[i*16+j])) + " "
+			d += str((test[i*16+j])) + " "
 		print(d)
 
 #***********************************************************************************
@@ -107,6 +130,15 @@ def RELU(x):
 		return 0
 	else:
 		return x
+    
+def dRELU(x):
+    """if x <= 0:
+        return 0
+    else:
+        return 1"""
+    return x * (1 - x)
+    #return 1 + random.random();
+
 
 def tanh(x):
 	return math.tanh(x)
@@ -135,10 +167,13 @@ def calc_output_RELU2(inp, hw, hb, size_in, size_out, out):
             out[I] = 0
             nb += 1
         else:
+            #print(( ri + hb[o] ) )
             out[I]=  RELU( ri + hb[o] ) 
         I += 1
+    #print(out)
     #return out
-
+    #
+    #print("-----------------------------------")
 
 def calc_output_RELUF(inp, hw, hb, size_in, size_out, out):
     #out = np.zeros(size_out)
@@ -150,6 +185,8 @@ def calc_output_RELUF(inp, hw, hb, size_in, size_out, out):
 
         out[I] = ri + hb[o]
         I += 1
+        
+    
     #return out
 
 
@@ -193,7 +230,259 @@ def hidden_backp4(alm1, cost, output, outputw, outputb, size_c, size_out, size_i
                     
                     outputw[o,i] -= LR* dw
                     
-                    
+def hidden_backp71(alm1, cost, output, outputw, outputb, size_c, size_out, size_in):
+        
+        for c in range(size_c):
+            #for o in range(size_out):
+            d = derive(output[c])
+            db = d * 2 * cost[c]
+            outputb[c] -=  LR * db #+ random.random()
+                            
+            for i in range(size_in):
+                
+                
+                dw = alm1[i] * d * 2 * cost[c]
+                
+                outputw[c,i] -= LR* dw
+                
+def hidden_backp72(alm1, cost, output, outputwp1,  size_outp1, outputw, outputb, size_c, size_out, size_in):
+        
+        #for c in range(size_c):
+        for o in range(size_out):
+            d = derive(output[o])
+            db = d #* 2 * cost[c]
+            outputb[o] -=  LR * db #+ random.random()
+            
+            etotal = 1
+            #for wi in range(size_inp1):
+            for wo in range(size_outp1):
+            #
+                etotal *=  outputwp1[wo][o]
+            
+            nb = 0
+            nbmax = 0
+            if(size_in < 4):
+                nbmax = 1.0
+            else:
+                nbmax = size_in * 0.25
+            for i in range(size_in):
+                r = random.random()
+                if (r <= 0.25) and (nb < nbmax):
+                    nb += 1
+                    alm1[i] = 0
+                
+                dw = alm1[i] * d * etotal # * cost[c]
+                
+                outputw[o,i] -= LR* dw                
+            
+def hidden_backp73(alm1, cost, output, outputwp1, size_outp1, outputwp2, size_outp2, outputw, outputb, size_c, size_out, size_in):
+    
+        etotal=1
+        for o in range(size_outp2):
+            for i in range(size_outp1):
+            #
+                etotal *=  outputwp2[o][i]
+        
+        #for c in range(size_c):
+        for o in range(size_out):
+            d = derive(output[o])
+            db = d #* 2 * cost[c]
+            outputb[o] -=  LR * db #+ random.random()
+            
+            etotal2 = 1
+            #for wi in range(size_inp1):
+            for wo in range(size_outp1):
+            #
+                etotal2 *=  outputwp1[wo][o]
+            
+            nb = 0
+            nbmax = 0
+            if(size_in < 4):
+                nbmax = 1.0
+            else:
+                nbmax = size_in * 0.25
+            for i in range(size_in):
+                r = random.random()
+                if (r <= 0.25) and (nb < nbmax):
+                    nb += 1
+                    alm1[i] = 0
+                
+                dw = alm1[i] * d * etotal2 * etotal # * cost[c]
+                
+                outputw[o,i] -= LR* dw           
+                
+def backprop1(cost):
+    for c in range(size_output):
+            #for o in range(size_out):
+            d = dRELU(output[0][c])
+            db = d * 2 * cost[c]
+            outputb[0][c] -=  LR * db #+ random.random()
+                            
+            for i in range(size_hiddenf):
+                                
+                dw = hidden[3][i] * d * 2.0 * cost[c]
+                
+                outputw[0][c,i] -= LR* dw
+                
+def backprop2(cost, W):
+    
+    for o in range(size_hiddenf):
+            d = dRELU(hidden[3][o])
+            db = d #* 2 * cost[c]
+            hiddenb[3][o] -=  LR * db #+ random.random()
+            
+            etotal = 1
+            #for wi in range(size_inp1):
+            for wo in range(size_output):
+            #
+                etotal *=  (outputw2[0][wo][o]+random.random()*2) * 2 * cost[wo]
+                
+            #if W == 9:
+             #   print(etotal)
+            
+            """nb = 0
+            nbmax = 0
+            if(size_hidden3 < 4):
+                nbmax = 1.0
+            else:
+                nbmax = size_hidden3 * 0.25"""
+            for i in range(size_hidden3):
+                """r = random.random()
+                if (r <= 0.25) and (nb < nbmax):
+                    nb += 1
+                    hidden[2][i] = 0.0"""
+                
+                dw = hidden[2][i] * d * etotal # * cost[c]
+                
+                hiddenw[3][o,i] -= LR* dw 
+                
+def backprop3(cost, W):
+    
+    for o in range(size_hidden3):
+            d = dRELU(hidden[2][o])
+            db = d #* 2 * cost[c]
+            hiddenb[2][o] -=  LR * db #+ random.random()
+            
+            etotal = 1
+            for wo in range(size_output):
+                for wi in range(size_hiddenf):
+            
+                    etotal *=  (outputw2[0][wo][wi] +random.random()*2)* 2.0 *cost[wo]
+            #print(etotal)    
+            for wo in range(size_hiddenf):
+            
+                etotal *= ( hiddenw2[3][wo][o] +random.random()*2)
+            
+            #if W == 9:
+             #   print(etotal) 
+            """nb = 0
+            nbmax = 0
+            if(size_hidden2 < 4):
+                nbmax = 1.0
+            else:
+                nbmax = size_hidden2 * 0.25"""
+            for i in range(size_hidden2):
+                """r = random.random()
+                if (r <= 0.25) and (nb < nbmax):
+                    nb += 1
+                    hidden[1][i] = 0.0"""
+                
+                dw = hidden[1][i] * d * etotal # * cost[c]
+                
+                hiddenw[2][o,i] -= LR* dw 
+                
+def backprop4(cost, W):
+    
+    for o in range(size_hidden2):
+            d = dRELU(hidden[1][o])
+            db = d #* 2 * cost[c]
+            hiddenb[1][o] -=  LR * db #+ random.random()
+            
+            etotal = 1
+            for wo in range(size_output):
+                for wi in range(size_hiddenf):
+            
+                    etotal *=  (outputw2[0][wo][wi]+random.random()*2) * 2.0 *cost[wo]
+            #print(etotal)   
+            for wo in range(size_hiddenf):
+                for wi in range(size_hidden3):
+                    etotal *=  (hiddenw2[3][wo][wi] +random.random()*2)
+            #print(etotal)    
+            for wo in range(size_hidden3):
+            
+                etotal *= ( hiddenw2[2][wo][o] +random.random()*2)
+                
+            #if W == 9:
+            #    print(etotal)
+            
+            """nb = 0
+            nbmax = 0
+            if(size_hidden < 4):
+                nbmax = 1.0
+            else:
+                nbmax = size_hidden * 0.25"""
+            for i in range(size_hidden):
+                """r = random.random()
+                if (r <= 0.25) and (nb < nbmax):
+                    nb += 1
+                    hidden[0][i] = 0.0"""
+                
+                dw = hidden[0][i] * d * etotal # * cost[c]
+                
+                hiddenw[1][o,i] -= LR* dw 
+                
+def backprop5(cost, W):
+    
+    #display_test(inputn, 2)
+    
+    for o in range(size_hidden):
+            d = dRELU(hidden[0][o])
+            #print(hidden)
+            db = d #* 2 * cost[c]
+            hiddenb[0][o] -=  LR * db #+ random.random()
+            
+            etotal = 1
+            for wo in range(size_output):
+                for wi in range(size_hiddenf):
+                    #print(outputw2[0][wo][wi])
+                    #print(cost[wo])
+                    etotal *=  (outputw2[0][wo][wi]+random.random()*2) * 2.0 *cost[wo]
+            #print(etotal)   
+            for wo in range(size_hiddenf):
+                for wi in range(size_hidden3):
+                    #print(hiddenw2[3][wo][wi] )
+                    etotal *=  (hiddenw2[3][wo][wi] +random.random()*2)
+            #print(etotal)    
+            for wo in range(size_hidden3):
+                for wi in range(size_hidden2):
+                    #print(hiddenw2[2][wo][wi] )
+                    etotal *=  (hiddenw2[2][wo][wi] +random.random()*2)
+            #print(etotal)   
+            for wo in range(size_hidden2):
+                #print(hiddenw2[1][wo][wi] )
+                etotal *=  (hiddenw2[1][wo][o] +random.random()*10)
+                
+            #print(etotal)
+            #print(hiddenw2)
+            
+            
+            nb = 0
+            nbmax = 0
+            if(size_input < 4):
+                nbmax = 1.0
+            else:
+                nbmax = size_input * 0.25
+            for i in range(size_input):
+                """r = random.random()
+                if (r <= 0.25) and (nb < nbmax):
+                    nb += 1
+                    inputn[i] = 0.0"""
+                
+                dw = inputn[i] * d * etotal # * cost[c]
+                #if W == 9:
+                 #   print("dw:" + str(dw)  + " inputn: " + str(inputn[i]) + " d: " + str(d) )
+                hiddenw[0][o,i] -= LR* dw 
+                
                     
 def BN(inp, size_in, scale, Y):
 
@@ -236,6 +525,31 @@ def Dropout_input(inputn):
             nb += 1
             inputn[i] = 0
 
+def Copy(hidden, hidden2, hiddenw, hiddenw2, hiddenb, hiddenb2, output, output2, outputw, outputw2, outputb, outputb2):
+    
+    hidden2[0] = hidden[0].copy()
+    hidden2[1] = hidden[1].copy()
+    hidden2[2] = hidden[2].copy()
+    hidden2[3] = hidden[3].copy()
+    
+    #print(hidden2)
+    #print(hidden)
+    
+    hiddenw2[0] = hiddenw[0].copy()
+    hiddenw2[1] = hiddenw[1].copy()
+    hiddenw2[2] = hiddenw[2].copy()
+    hiddenw2[3] = hiddenw[3].copy()
+    
+    #print(hiddenw2[0][0][0])
+    
+    hiddenb2[0] = hiddenb[0].copy()
+    hiddenb2[1] = hiddenb[1].copy()
+    hiddenb2[2] = hiddenb[2].copy()
+    hiddenb2[3] = hiddenb[3].copy()
+    
+    output2[0] = output[0].copy()
+    outputw2[0] = outputw[0].copy()
+    outputb2[0] = outputb[0].copy()
 
 def Afficher_images(path_dir, valid, nb, score, pct):
     
@@ -249,7 +563,7 @@ def Afficher_images(path_dir, valid, nb, score, pct):
     plt.imshow(Img_Pil)
     plt.xticks([])
     plt.yticks([])
-    plt.title(str(score) + "/" + str(nb) + " soit " + str(pct) + "%" , pad=1, size=20, color="Blue")
+    plt.title(str(score) + "/" + str(nb) + " soit " + str(pct) + "%" , size=20, color="Blue")
     
     for NoImg in range(nb):
                
@@ -263,11 +577,11 @@ def Afficher_images(path_dir, valid, nb, score, pct):
         plt.yticks([])
         
         if valid[NoImg]:
-            plt.title('Bien ' + str(I) + '/' + str(nb), pad=1, size=10, color="Green")
+            plt.title('Bien ' + str(I) + '/' + str(nb),  size=10, color="Green")
             #plt.title(str(I), pad=1, size=10, color="Blue")
             I += 1
         else:
-            plt.title('Mal classe', pad=1, size=10, color="Red")
+            plt.title('Mal classe',  size=10, color="Red")
                     
     plt.show()
     
