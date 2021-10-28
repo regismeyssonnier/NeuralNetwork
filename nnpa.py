@@ -23,7 +23,7 @@ while not stop:
     if change_in:
         test2inputn(TEST[I], inputn)
         BN(inputn, size_input, NORM, inputn)
-        Dropout_input(inputn)
+        #Dropout_input(inputn)
         change_in = False
         #display_test(inputn, 2)
        # print(inputn[0])
@@ -33,7 +33,7 @@ while not stop:
     calc_output_RELU2(hidden[1], hiddenw[2], hiddenb[2], size_hidden2, size_hidden3, hidden[2])
     calc_output_RELU2(hidden[2], hiddenw[3], hiddenb[3], size_hidden3, size_hiddenf, hidden[3])
     calc_output_RELUF(hidden[3], outputw[0], outputb[0], size_hiddenf, size_output_bias, output[0])
-    #print(hiddenw)
+    
     #print(str(I) + " : " + str(output[0]))
     
     #print("------------------------------------------------------------------")
@@ -85,6 +85,8 @@ while not stop:
         backprop4(cost, W)
         backprop5(cost, W)
 
+    #print(hidden)
+    
     I += 1
     change_in = True
 

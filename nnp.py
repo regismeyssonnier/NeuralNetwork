@@ -31,10 +31,10 @@ hidden2.append(np.zeros(size_hiddenf))
 #print(hidden)
 
 hiddenw = []
-hiddenw.append(np.random.random((size_hidden, size_input))-0.5)
-hiddenw.append(np.random.random((size_hidden2, size_hidden))-0.5)
-hiddenw.append(np.random.random((size_hidden3, size_hidden2))-0.5)
-hiddenw.append(np.random.random((size_hiddenf, size_hidden3))-0.5)
+hiddenw.append(np.random.random((size_hidden, size_input))*0.5-0.25)
+hiddenw.append(np.random.random((size_hidden2, size_hidden))*0.5-0.25)
+hiddenw.append(np.random.random((size_hidden3, size_hidden2))*0.5-0.25)
+hiddenw.append(np.random.random((size_hiddenf, size_hidden3))*0.5-0.25)
 #print(hiddenw)
 hiddenw2 = []
 hiddenw2.append(np.zeros((size_hidden, size_input)))
@@ -69,7 +69,7 @@ output2 = []
 output2.append(np.zeros(size_output))
 
 outputw = []
-outputw.append(np.random.random((size_output, size_hiddenf))*0.5)
+outputw.append(np.random.random((size_output, size_hiddenf))*0.5-0.25)
 outputw2 = []
 outputw2.append(np.zeros((size_output, size_hiddenf)))
 
@@ -136,8 +136,8 @@ def dRELU(x):
         return 0
     else:
         return 1"""
-    return x * (1 - x)
-    #return 1 + random.random();
+    #return x * (1 - x)
+    return 1 #+ random.random();
 
 
 def tanh(x):
@@ -283,6 +283,7 @@ def hidden_backp73(alm1, cost, output, outputwp1, size_outp1, outputwp2, size_ou
             #
                 etotal *=  outputwp2[o][i]
         
+        #print(etotal)
         #for c in range(size_c):
         for o in range(size_out):
             d = derive(output[o])
@@ -294,6 +295,8 @@ def hidden_backp73(alm1, cost, output, outputwp1, size_outp1, outputwp2, size_ou
             for wo in range(size_outp1):
             #
                 etotal2 *=  outputwp1[wo][o]
+                
+            
             
             nb = 0
             nbmax = 0
@@ -316,26 +319,26 @@ def backprop1(cost):
             #for o in range(size_out):
             d = dRELU(output[0][c])
             db = d * 2 * cost[c]
-            outputb[0][c] -=  LR * db #+ random.random()
+            outputb[0][c] +=  LR * db #+ random.random()
                             
             for i in range(size_hiddenf):
                                 
                 dw = hidden[3][i] * d * 2.0 * cost[c]
                 
-                outputw[0][c,i] -= LR* dw
+                outputw[0][c,i] += LR* dw
                 
 def backprop2(cost, W):
     
     for o in range(size_hiddenf):
             d = dRELU(hidden[3][o])
             db = d #* 2 * cost[c]
-            hiddenb[3][o] -=  LR * db #+ random.random()
+            hiddenb[3][o] +=  LR * db #+ random.random()
             
             etotal = 1
             #for wi in range(size_inp1):
             for wo in range(size_output):
             #
-                etotal *=  (outputw2[0][wo][o]+random.random()*2) * 2 * cost[wo]
+                etotal *=  (outputw2[0][wo][o]+ random.random()*2.0) * 2 * cost[wo]
                 
             #if W == 9:
              #   print(etotal)
@@ -353,25 +356,28 @@ def backprop2(cost, W):
                     hidden[2][i] = 0.0"""
                 
                 dw = hidden[2][i] * d * etotal # * cost[c]
-                
-                hiddenw[3][o,i] -= LR* dw 
+                #if W == 9:
+                #    print(str(hidden[2][i] ) + " =" + str(hiddenw[3][o,i]) + " " + str(LR*dw))
+                hiddenw[3][o,i] += LR* dw 
+                #if W == 9:
+                #    print(str(hidden[2][i] ) + " =" + str(hiddenw[3][o,i]) + " " + str(LR*dw))
                 
 def backprop3(cost, W):
     
     for o in range(size_hidden3):
             d = dRELU(hidden[2][o])
             db = d #* 2 * cost[c]
-            hiddenb[2][o] -=  LR * db #+ random.random()
+            hiddenb[2][o] +=  LR * db #+ random.random()
             
             etotal = 1
             for wo in range(size_output):
                 for wi in range(size_hiddenf):
             
-                    etotal *=  (outputw2[0][wo][wi] +random.random()*2)* 2.0 *cost[wo]
+                    etotal *=  (outputw2[0][wo][wi] + random.random()*2.0)* 2.0 *cost[wo]
             #print(etotal)    
             for wo in range(size_hiddenf):
             
-                etotal *= ( hiddenw2[3][wo][o] +random.random()*2)
+                etotal *= ( hiddenw2[3][wo][o] + random.random()*2.0)
             
             #if W == 9:
              #   print(etotal) 
@@ -389,28 +395,28 @@ def backprop3(cost, W):
                 
                 dw = hidden[1][i] * d * etotal # * cost[c]
                 
-                hiddenw[2][o,i] -= LR* dw 
+                hiddenw[2][o,i] += LR* dw 
                 
 def backprop4(cost, W):
     
     for o in range(size_hidden2):
             d = dRELU(hidden[1][o])
             db = d #* 2 * cost[c]
-            hiddenb[1][o] -=  LR * db #+ random.random()
+            hiddenb[1][o] +=  LR * db #+ random.random()
             
             etotal = 1
             for wo in range(size_output):
                 for wi in range(size_hiddenf):
             
-                    etotal *=  (outputw2[0][wo][wi]+random.random()*2) * 2.0 *cost[wo]
+                    etotal *=  (outputw2[0][wo][wi]+ random.random()*2.0) * 2.0 *cost[wo]
             #print(etotal)   
             for wo in range(size_hiddenf):
                 for wi in range(size_hidden3):
-                    etotal *=  (hiddenw2[3][wo][wi] +random.random()*2)
+                    etotal *=  (hiddenw2[3][wo][wi] + random.random()*2.0)
             #print(etotal)    
             for wo in range(size_hidden3):
             
-                etotal *= ( hiddenw2[2][wo][o] +random.random()*2)
+                etotal *= ( hiddenw2[2][wo][o] + random.random()*2.0)
                 
             #if W == 9:
             #    print(etotal)
@@ -429,7 +435,7 @@ def backprop4(cost, W):
                 
                 dw = hidden[0][i] * d * etotal # * cost[c]
                 
-                hiddenw[1][o,i] -= LR* dw 
+                hiddenw[1][o,i] += LR* dw 
                 
 def backprop5(cost, W):
     
@@ -439,28 +445,28 @@ def backprop5(cost, W):
             d = dRELU(hidden[0][o])
             #print(hidden)
             db = d #* 2 * cost[c]
-            hiddenb[0][o] -=  LR * db #+ random.random()
+            hiddenb[0][o] +=  LR * db #+ random.random()
             
             etotal = 1
             for wo in range(size_output):
                 for wi in range(size_hiddenf):
                     #print(outputw2[0][wo][wi])
                     #print(cost[wo])
-                    etotal *=  (outputw2[0][wo][wi]+random.random()*2) * 2.0 *cost[wo]
+                    etotal *=  (outputw2[0][wo][wi]+ random.random()*2.0) * 2.0 *cost[wo]
             #print(etotal)   
             for wo in range(size_hiddenf):
                 for wi in range(size_hidden3):
                     #print(hiddenw2[3][wo][wi] )
-                    etotal *=  (hiddenw2[3][wo][wi] +random.random()*2)
+                    etotal *=  (hiddenw2[3][wo][wi] + random.random()*2.0)
             #print(etotal)    
             for wo in range(size_hidden3):
                 for wi in range(size_hidden2):
                     #print(hiddenw2[2][wo][wi] )
-                    etotal *=  (hiddenw2[2][wo][wi] +random.random()*2)
+                    etotal *=  (hiddenw2[2][wo][wi] + random.random()*2.0)
             #print(etotal)   
             for wo in range(size_hidden2):
                 #print(hiddenw2[1][wo][wi] )
-                etotal *=  (hiddenw2[1][wo][o] +random.random()*10)
+                etotal *=  (hiddenw2[1][wo][o] + random.random()*2.0)
                 
             #print(etotal)
             #print(hiddenw2)
@@ -480,9 +486,12 @@ def backprop5(cost, W):
                 
                 dw = inputn[i] * d * etotal # * cost[c]
                 #if W == 9:
-                 #   print("dw:" + str(dw)  + " inputn: " + str(inputn[i]) + " d: " + str(d) )
-                hiddenw[0][o,i] -= LR* dw 
-                
+                 #   print("--------dw:" + str(LR*dw)  + " inputn: " + str(inputn[i]) + " d: " + str(d)  + " etotal:" + str(etotal))
+                #if W == 9:
+                #    print(hiddenw[0][o,i])
+                hiddenw[0][o,i] += LR* dw 
+                #if W == 9:
+                #    print(hiddenw[0][o,i])
                     
 def BN(inp, size_in, scale, Y):
 
