@@ -24,3 +24,7 @@ https://www.kaggle.com/chetankv/dogs-cats-images
 - need to **rename** the image in test_set file: cat.1.jpg to cat.1000.jpg and the same for the dog 🐱 🐶
     
 - rename the image with the file ***rename.py***
+
+## 3. Wiki
+
+Look at the wiki [here](https://github.com/regismeyssonnier/NeuralNetwork/wiki)
