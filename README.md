@@ -6,9 +6,9 @@ Neural network who  detects if it's a ***cat or dog***. 🐱 🐶
 
 Neural network qui détecte si c'est un chat ou un chien.
 
-- 🏃 Run **nna.py** to test or **nnpa.py** for best version.
+- 🏃 Run **nnpa.py** to execute the neural network
 
-- ⏯️ Lancez **nna.py** pour tester ou **nnpa.py** pour l'autre version qui est meilleur.
+- ⏯️ Lancez **nnpa.py** pour exécuter le réseau de neurone. .
 
         Execute to test nnpa.py for best version 👽
 
