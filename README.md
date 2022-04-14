@@ -4,10 +4,6 @@
 
 Neural network who  detects if it's a ***cat or dog***. 🐱 🐶
 
-Detects the **image sample** (archive.zip) 📁
-
-Decompress the **archive.zip**📁 to find the image to ***train and test*** the neural network.
-
 Neural network qui détecte si c'est un chat ou un chien.
 
 - 🏃 Run **nna.py** to test or **nnpa.py** for best version.
