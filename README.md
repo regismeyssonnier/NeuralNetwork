@@ -8,9 +8,9 @@ Neural network qui détecte si c'est un chat ou un chien.
 
 - 🏃 Run **nnpa.py** to execute the neural network
 
-- ⏯️ Lancez **nnpa.py** pour exécuter le réseau de neurone. .
+- ⏯️ Lancez **neuraln.py** pour exécuter le réseau de neurone. .
 
-        Execute nnpa.py the best version 👽
+        The best version 👽
 
 ## 2. Installation
 
