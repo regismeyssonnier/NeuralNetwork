@@ -15,9 +15,10 @@ Neural network qui détecte si c'est un chat ou un chien.
 ## 2. Installation
 
 DOWNLOAD ⏬ archive.zip to
-https://www.kaggle.com/chetankv/dogs-cats-images
+https://www.kaggle.com/
+The pack : chihuhua vs muffin
 
-- need to **rename** the image in test_set file: cat.1.jpg to cat.1000.jpg and the same for the dog 🐱 🐶
+- need to **rename** the image in test_set file: chihuhua.1.jpg to muffin.1000.jpg and the same for the dog 🐱 🐶
     
 - rename the image with the file ***rename.py***
 
