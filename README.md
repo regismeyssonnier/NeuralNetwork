@@ -25,3 +25,8 @@ The pack : chihuhua vs muffin
 ## 3. Wiki
 
 Look at the wiki [here](https://github.com/regismeyssonnier/NeuralNetwork/wiki)
+
+
+## 4. NeuralNetwors.cpp
+
+There is also an implementation of a neural network in cpp. It manages by batch size 10 the training of 1000 shades of 2 images. And detect a ***square up left*** in ***image1*** and ***square down right*** in ***image2***.
