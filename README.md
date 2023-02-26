@@ -2,7 +2,7 @@
 
 ## 1. Neural Network 
 
-Neural network who  detects if it's a ***cat or dog***. 🐱 🐶
+Neural network who  detects if it's a ***muffin or chihuahua***. 🐱 🐶
 
 Neural network qui détecte si c'est un chat ou un chien.
 
