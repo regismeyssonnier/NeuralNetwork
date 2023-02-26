@@ -4,7 +4,7 @@
 
 Neural network who  detects if it's a ***muffin or chihuahua***. 🍪 🐶
 
-Neural network qui détecte si c'est un chat ou un chien.
+Neural network qui détecte si c'est un chihuahua ou un muffin.
 
 - 🏃 Run **nnpa.py** to execute the neural network
 
