@@ -4,16 +4,16 @@ import numpy as np
 import os
 import random
 
-size_input = 256
+size_input = 4096
 inputn = np.zeros(size_input)
 
 #print(inputn)
 
-nb_hidden = 4
+nb_hidden = 1
 size_hidden = 64
-size_hidden2 = 32
-size_hidden3 = 16#30#100#44
-size_hiddenf = 8
+size_hidden2 = 4
+size_hidden3 = 4#30#100#44
+size_hiddenf = 4
 max_size_hidden = size_hidden
 
 hidden = []
@@ -31,10 +31,10 @@ hidden2.append(np.zeros(size_hiddenf))
 #print(hidden)
 
 hiddenw = []
-hiddenw.append(np.random.random((size_hidden, size_input))*0.5-0.25)
-hiddenw.append(np.random.random((size_hidden2, size_hidden))*0.5-0.25)
-hiddenw.append(np.random.random((size_hidden3, size_hidden2))*0.5-0.25)
-hiddenw.append(np.random.random((size_hiddenf, size_hidden3))*0.5-0.25)
+hiddenw.append((np.random.random((size_hidden, size_input))*40.0+1)/100.0)
+hiddenw.append((np.random.random((size_hidden2, size_hidden))*40.0+1)/100.0)
+hiddenw.append((np.random.random((size_hidden3, size_hidden2))*40.0+1)/100.0)
+hiddenw.append((np.random.random((size_hiddenf, size_hidden3))*40.0+1)/100.0)
 #print(hiddenw)
 hiddenw2 = []
 hiddenw2.append(np.zeros((size_hidden, size_input)))
@@ -43,10 +43,10 @@ hiddenw2.append(np.zeros((size_hidden3, size_hidden2)))
 hiddenw2.append(np.zeros((size_hiddenf, size_hidden3)))
 
 hiddenb = []
-hiddenb.append(np.random.random(size_hidden)*0.1)
-hiddenb.append(np.random.random(size_hidden2)*0.1)
-hiddenb.append(np.random.random(size_hidden3)*0.1)
-hiddenb.append(np.random.random(size_hiddenf)*0.1)
+hiddenb.append((np.random.random(size_hidden)*40.0+1)/100.0)
+hiddenb.append((np.random.random(size_hidden2)*40.0+1)/100.0)
+hiddenb.append((np.random.random(size_hidden3)*40.0+1)/100.0)
+hiddenb.append((np.random.random(size_hiddenf)*40.0+1)/100.0)
 #print(hiddenb)
 
 hiddenb2 = []
@@ -69,17 +69,21 @@ output2 = []
 output2.append(np.zeros(size_output))
 
 outputw = []
-outputw.append(np.random.random((size_output, size_hiddenf))*0.5-0.25)
+#outputw.append(np.random.random((size_output, size_hiddenf))*40.0/100.0)
+outputw.append((np.random.random((size_output, size_hidden))*40.0+1)/100.0)
+
 outputw2 = []
-outputw2.append(np.zeros((size_output, size_hiddenf)))
+#outputw2.append(np.zeros((size_output, size_hiddenf)))
+outputw2.append(np.zeros((size_output, size_hidden)))
 
 outputb = []
-outputb.append(np.random.random(size_output)*0.1)
+outputb.append((np.random.random(size_output)*40.0+1)/100.0)
 #print(outputb)
 outputb2 = []
 outputb2.append(np.zeros(size_output))
 
-LR = 0.0009
+LR = 0.000000000000001
+LRB =0.0000000000001
 
 TEST = []
 TEST_out = []
@@ -91,12 +95,20 @@ PATHV = []
 
 def test2inputn(test, inp):
     #inp = np.zeros(len(test))
+    #print(test)
     I = 0
     for t in test:
         inp[I] = t
         I += 1
+
     #return inp
     #display_test(inp, 1)
+
+def display_input(inp):
+    for i in range(size_input):
+        print(str(inputn[i]))
+
+
 def display_test(test, out):
 
 	print("output :  " + str(out))
@@ -105,6 +117,97 @@ def display_test(test, out):
 		for j in range(16):
 			d += str((test[i*16+j])) + " "
 		print(d)
+
+def display_weight_bias2():
+
+    """print("Hiddenw 1")
+    for i in range(size_hidden):
+        for j in range(size_input):
+            print(str(i) +":"+str(hiddenw[0][i][j]))
+
+    print("Hidden b 1")
+    for i in range(size_hidden):
+        print(str(i) +":"+str(hiddenb[0][i]))"""
+
+    print("Output b 1")
+    for i in range(size_output):
+        print(str(i) +":"+str(outputb[0][i]))
+
+    print("Output res 1")
+    for i in range(size_output):
+        print(str(i) +":"+str(output[0][i]))
+
+
+
+def display_weight_bias():
+
+    print("Hiddenw 1")
+    for i in range(size_hidden):
+        for j in range(size_input):
+            print(str(i) +":"+str(hiddenw[0][i][j]))
+       
+    print("Hiddenw 2")
+    for i in range(size_hidden2):
+        for j in range(size_hidden):
+            print(str(i) +":"+str(hiddenw[1][i][j]))
+
+    print("Hiddenw 3")
+    for i in range(size_hidden3):
+        for j in range(size_hidden2):
+            print(str(i) +":"+str(hiddenw[2][i][j]))
+
+    print("Hiddenw f")
+    for i in range(size_hiddenf):
+        for j in range(size_hidden3):
+            print(str(i) +":"+str(hiddenw[3][i][j]))
+
+    print("Outputw 1")
+    for i in range(size_output):
+        for j in range(size_hiddenf):
+            print(str(i) +":"+str(outputw[0][i][j]))
+
+
+    print("Hidden b 1")
+    for i in range(size_hidden):
+        print(str(i) +":"+str(hiddenb[0][i]))
+
+    print("Hidden b 2")
+    for i in range(size_hidden2):
+        print(str(i) +":"+str(hiddenb[1][i]))
+
+    print("Hidden b 3")
+    for i in range(size_hidden3):
+        print(str(i) +":"+str(hiddenb[2][i]))
+
+    print("Hidden b f")
+    for i in range(size_hiddenf):
+        print(str(i) +":"+str(hiddenb[3][i]))
+
+    print("Output b 1")
+    for i in range(size_output):
+        print(str(i) +":"+str(outputb[0][i]))
+
+    print("Hidden res 1")
+    for i in range(size_hidden):
+        print(str(i) +":"+str(hidden[0][i]))
+
+    print("Hidden res 2")
+    for i in range(size_hidden2):
+        print(str(i) +":"+str(hidden[1][i]))
+
+    print("Hidden res 3")
+    for i in range(size_hidden3):
+        print(str(i) +":"+str(hidden[2][i]))
+
+    print("Hidden res f")
+    for i in range(size_hiddenf):
+        print(str(i) +":"+str(hidden[3][i]))
+
+    print("Output res 1")
+    for i in range(size_output):
+        print(str(i) +":"+str(output[0][i]))
+
+
 
 #***********************************************************************************
 
@@ -132,13 +235,16 @@ def RELU(x):
 		return x
     
 def dRELU(x):
-    """if x <= 0:
-        return 0
+    if x > 0:
+        return 1  
     else:
-        return 1"""
-    #return x * (1 - x)
-    return 1 #+ random.random();
+        return 0
 
+def dRelu(x):
+    if x > 0:
+        return 1  
+    else:
+        return 0
 
 def tanh(x):
 	return math.tanh(x)
@@ -174,6 +280,20 @@ def calc_output_RELU2(inp, hw, hb, size_in, size_out, out):
     #return out
     #
     #print("-----------------------------------")
+
+def calc_output_RELU(inp, hw, hb, size_in, size_out, out):
+    #out = np.zeros(size_out)
+    I = 0
+    
+    for o in range(size_out):
+        ri = 0
+        for i in range(size_in):
+            ri += inp[i] * hw[o,i]
+
+        out[I]=  RELU( ri + hb[o] ) 
+        I += 1
+   
+
 
 def calc_output_RELUF(inp, hw, hb, size_in, size_out, out):
     #out = np.zeros(size_out)
@@ -492,6 +612,414 @@ def backprop5(cost, W):
                 hiddenw[0][o,i] += LR* dw 
                 #if W == 9:
                 #    print(hiddenw[0][o,i])
+            
+
+def Backpropagation512(cost):
+
+    dw = 0;
+    for o in range(size_output):
+        for i in range(size_hidden):
+            outputw[0][o, i] -= LR * cost[o] * hidden[0][i]
+
+    for o in range(size_output):
+        outputb[0][o] -=  LR * cost[o]
+
+    print("end output back")
+
+    #hiddenf
+    for o in range(size_output):
+        for f in range(size_hidden):
+            for i in range(size_input):
+                    hiddenw[0][f,i] -= LR * cost[o] * outputw[0][o, f] * dRelu(hidden[0][f]) * inputn[i]
+
+    for o in range(size_output):
+        for f in range(size_hidden):
+            hiddenb[0][f] -= LR * cost[o] * outputw[0][o, f] * dRelu(hidden[0][f]) 
+
+    print("end hiddenf back")
+
+
+
+def Backpropagation(num_output, cost):
+
+    dw = 0;
+    for i in range(size_hiddenf):
+        outputw[0][num_output, i] -= LR * cost * hidden[3][i]
+
+    outputb[0][num_output] -=  LR * cost
+
+    print("end output back")
+
+    #hiddenf
+    for f in range(size_hiddenf):
+        for i in range(size_hidden3):
+                hiddenw[3][f,i] -= LR * cost * outputw[0][num_output, f] * dRelu(hidden[3][f]) * hidden[2][i]
+
+    for f in range(size_hiddenf):
+        hiddenb[3][f] -= LR * cost * outputw[0][num_output, f] * dRelu(hidden[3][f]) 
+
+    print("end hiddenf back")
+
+    #hidden3
+    for f in range(size_hiddenf):
+        for i in range(size_hidden3):
+            for j in range(size_hidden2):
+                hiddenw[2][i, j] -= LR * cost * outputw[0][num_output, f] * dRelu(hidden[3][f]) * hiddenw[3][f,i] * dRelu(hidden[2][i]) * hidden[1][j]
+
+    for f in range(size_hiddenf):
+        for i in range(size_hidden3):
+                hiddenb[2][i] -= LR * cost * outputw[0][num_output, f] * dRelu(hidden[3][f]) * hiddenw[3][f,i] * dRelu(hidden[2][i]) 
+
+    print("end hidden3 back")
+
+    #hidden2
+    for f in range(size_hiddenf):
+        for i in range(size_hidden3):
+            for j in range(size_hidden2):
+                for k in range(size_hidden):
+                    hiddenw[1][j, k] -= LR * cost * outputw[0][num_output, f] * dRelu(hidden[3][f]) * hiddenw[3][f,i] * dRelu(hidden[2][i]) * hiddenw[2][i, j] * dRelu(hidden[1][j]) * hidden[0][k]
+
+    for f in range(size_hiddenf):
+        for i in range(size_hidden3):
+            for j in range(size_hidden2):
+                hiddenb[1][j] -= LR * cost * outputw[0][num_output, f] * dRelu(hidden[3][f]) * hiddenw[3][f,i] * dRelu(hidden[2][i]) * hiddenw[2][i, j] * dRelu(hidden[1][j])
+
+    print("end hidden2 back")
+    #hidden
+    for f in range(size_hiddenf):
+        for i in range(size_hidden3):
+            for j in range(size_hidden2):
+                for k in range(size_hidden):
+                    for l in range(size_input):
+                        #print("f " + str(f) + " "+ str(i) + " "+ str(j) + " "+ str(k) + " " + str(l) + " "+ str(size_hiddenf))
+                        hiddenw[0][k, l] -= LR * cost * outputw[0][num_output, f] * dRelu(hidden[3][f]) * hiddenw[3][f,i] * dRelu(hidden[2][i]) * hiddenw[2][i, j] * dRelu(hidden[1][j]) * hiddenw[1][j, k] * dRelu(hidden[0][k]) * inputn[l]
+
+    for f in range(size_hiddenf):
+        for i in range(size_hidden3):
+            for j in range(size_hidden2):
+                for k in range(size_hidden):
+                    hiddenb[0][k] -= LR * cost * outputw[0][num_output, f] * dRelu(hidden[3][f]) * hiddenw[3][f,i] * dRelu(hidden[2][i]) * hiddenw[2][i, j] * dRelu(hidden[1][j]) * hiddenw[1][j, k] * dRelu(hidden[0][k])
+
+    print("end hidden back")
+
+def BackpropagationRM(cost):
+
+    dw = 0;
+    for o in range(size_output):
+        for i in range(size_hiddenf):
+            outputw[0][o, i] -= LR * cost[o] * hidden[3][i]
+
+    for o in range(size_output):
+        outputb[0][o] -=  LRB * cost[o]
+
+    print("end output back")
+
+    #hiddenf
+    for o in range(size_output):
+        for f in range(size_hiddenf):
+            for i in range(size_hidden3):
+                    hiddenw[3][f,i] -= LR * cost[o] * outputw[0][o, f] * dRelu(hidden[3][f]) * hidden[2][i]
+
+    for o in range(size_output):
+        for f in range(size_hiddenf):
+            hiddenb[3][f] -= LRB * cost[o] * outputw[0][o, f] * dRelu(hidden[3][f]) 
+
+    print("end hiddenf back")
+
+    #hidden3
+    for o in range(size_output):
+        for f in range(size_hiddenf):
+            for i in range(size_hidden3):
+                for j in range(size_hidden2):
+                    hiddenw[2][i, j] -= LR * cost[o] * outputw[0][o, f] * dRelu(hidden[3][f]) * hiddenw[3][f,i] * dRelu(hidden[2][i]) * hidden[1][j]
+
+    for o in range(size_output):
+        for f in range(size_hiddenf):
+            for i in range(size_hidden3):
+                    hiddenb[2][i] -= LRB * cost[o] * outputw[0][o, f] * dRelu(hidden[3][f]) * hiddenw[3][f,i] * dRelu(hidden[2][i]) 
+
+    print("end hidden3 back")
+
+    #hidden2
+    for o in range(size_output):
+        for f in range(size_hiddenf):
+            for i in range(size_hidden3):
+                for j in range(size_hidden2):
+                    for k in range(size_hidden):
+                        hiddenw[1][j, k] -= LR * cost[o] * outputw[0][o, f] * dRelu(hidden[3][f]) * hiddenw[3][f,i] * dRelu(hidden[2][i]) * hiddenw[2][i, j] * dRelu(hidden[1][j]) * hidden[0][k]
+
+    for o in range(size_output):
+        for f in range(size_hiddenf):
+            for i in range(size_hidden3):
+                for j in range(size_hidden2):
+                    hiddenb[1][j] -= LRB * cost[o] * outputw[0][o, f] * dRelu(hidden[3][f]) * hiddenw[3][f,i] * dRelu(hidden[2][i]) * hiddenw[2][i, j] * dRelu(hidden[1][j])
+
+    print("end hidden2 back")
+    #hidden
+    for o in range(size_output):
+        for f in range(size_hiddenf):
+            for i in range(size_hidden3):
+                for j in range(size_hidden2):
+                    for k in range(size_hidden):
+                        for l in range(size_input):
+                            #print("f " + str(f) + " "+ str(i) + " "+ str(j) + " "+ str(k) + " " + str(l) + " "+ str(size_hiddenf))
+                            hiddenw[0][k, l] -= LR * cost[o] * outputw[0][o, f] * dRelu(hidden[3][f]) * hiddenw[3][f,i] * dRelu(hidden[2][i]) * hiddenw[2][i, j] * dRelu(hidden[1][j]) * hiddenw[1][j, k] * dRelu(hidden[0][k]) * inputn[l]
+
+    for o in range(size_output):
+        for f in range(size_hiddenf):
+            for i in range(size_hidden3):
+                for j in range(size_hidden2):
+                    for k in range(size_hidden):
+                        hiddenb[0][k] -= LRB * cost[o] * outputw[0][o, f] * dRelu(hidden[3][f]) * hiddenw[3][f,i] * dRelu(hidden[2][i]) * hiddenw[2][i, j] * dRelu(hidden[1][j]) * hiddenw[1][j, k] * dRelu(hidden[0][k])
+
+    print("end hidden back")
+
+
+def Backpropagation2(num_output, cost):
+
+    dw = 0;
+    for i in range(size_hiddenf):
+        outputw[0][num_output, i] -= LR * cost * hidden[3][i]
+
+    outputb[0][num_output] -=  LR * cost
+
+    print("end output back")
+
+    #hiddenf
+    for f in range(size_hiddenf):
+        for i in range(size_hidden3):
+                hiddenw[3][f,i] -= LR * cost * outputw2[0][num_output, f] * dRelu(hidden[3][f]) * hidden[2][i]
+
+    for f in range(size_hiddenf):
+        hiddenb[3][f] -= LR * cost * outputw2[0][num_output, f] * dRelu(hidden[3][f]) 
+
+    print("end hiddenf back")
+
+    #hidden3
+    for f in range(size_hiddenf):
+        for i in range(size_hidden3):
+            for j in range(size_hidden2):
+                hiddenw[2][i, j] -= LR * cost * outputw2[0][num_output, f] * dRelu(hidden[3][f]) * hiddenw2[3][f,i] * dRelu(hidden[2][i]) * hidden[1][j]
+
+    for f in range(size_hiddenf):
+        for i in range(size_hidden3):
+                hiddenb[2][i] -= LR * cost * outputw2[0][num_output, f] * dRelu(hidden[3][f]) * hiddenw2[3][f,i] * dRelu(hidden[2][i]) 
+
+    print("end hidden3 back")
+
+    #hidden2
+    for f in range(size_hiddenf):
+        for i in range(size_hidden3):
+            for j in range(size_hidden2):
+                for k in range(size_hidden):
+                    hiddenw[1][j, k] -= LR * cost * outputw2[0][num_output, f] * dRelu(hidden[3][f]) * hiddenw2[3][f,i] * dRelu(hidden[2][i]) * hiddenw2[2][i, j] * dRelu(hidden[1][j]) * hidden[0][k]
+
+    for f in range(size_hiddenf):
+        for i in range(size_hidden3):
+            for j in range(size_hidden2):
+                hiddenb[1][j] -= LR * cost * outputw2[0][num_output, f] * dRelu(hidden[3][f]) * hiddenw2[3][f,i] * dRelu(hidden[2][i]) * hiddenw2[2][i, j] * dRelu(hidden[1][j])
+
+    print("end hidden2 back")
+    #hidden
+    for f in range(size_hiddenf):
+        for i in range(size_hidden3):
+            for j in range(size_hidden2):
+                for k in range(size_hidden):
+                    for l in range(size_input):
+                        #print("f " + str(f) + " "+ str(i) + " "+ str(j) + " "+ str(k) + " " + str(l) + " "+ str(size_hiddenf))
+                        hiddenw[0][k, l] -= LR * cost * outputw2[0][num_output, f] * dRelu(hidden[3][f]) * hiddenw2[3][f,i] * dRelu(hidden[2][i]) * hiddenw2[2][i, j] * dRelu(hidden[1][j]) * hiddenw2[1][j, k] * dRelu(hidden[0][k]) * inputn[l]
+
+    for f in range(size_hiddenf):
+        for i in range(size_hidden3):
+            for j in range(size_hidden2):
+                for k in range(size_hidden):
+                    hiddenb[0][k] -= LR * cost * outputw2[0][num_output, f] * dRelu(hidden[3][f]) * hiddenw2[3][f,i] * dRelu(hidden[2][i]) * hiddenw2[2][i, j] * dRelu(hidden[1][j]) * hiddenw2[1][j, k] * dRelu(hidden[0][k])
+
+    print("end hidden back")
+
+
+
+
+def backprop12(cost):
+    for c in range(size_output):
+            #for o in range(size_out):
+            d = dRELU(output[0][c])
+            db = d * 2 * cost[c]
+            outputb[0][c] +=  LR * db #+ random.random()
+                            
+            for i in range(size_hiddenf):
+                                
+                dw = hidden[3][i] * d * 2.0 * cost[c]
+                
+                outputw[0][c,i] += LR* dw
+                
+def backprop22(cost, W):
+    
+    for o in range(size_hiddenf):
+            d = dRELU(hidden[3][o])
+            db = d * 2 * cost[0] * 2 * cost[1]
+            hiddenb[3][o] +=  LR * db #+ random.random()
+            
+            etotal = 1
+            #for wi in range(size_inp1):
+            for wo in range(size_output):
+            #
+                etotal *=  (outputw2[0][wo][o]+ random.random()*2.0) * 2 * cost[wo]
+                
+            #if W == 9:
+             #   print(etotal)
+            
+            """nb = 0
+            nbmax = 0
+            if(size_hidden3 < 4):
+                nbmax = 1.0
+            else:
+                nbmax = size_hidden3 * 0.25"""
+            for i in range(size_hidden3):
+                """r = random.random()
+                if (r <= 0.25) and (nb < nbmax):
+                    nb += 1
+                    hidden[2][i] = 0.0"""
+                
+                dw = hidden[2][i] * d * etotal # * cost[c]
+                #if W == 9:
+                #    print(str(hidden[2][i] ) + " =" + str(hiddenw[3][o,i]) + " " + str(LR*dw))
+                hiddenw[3][o,i] += LR* dw 
+                #if W == 9:
+                #    print(str(hidden[2][i] ) + " =" + str(hiddenw[3][o,i]) + " " + str(LR*dw))
+                
+def backprop32(cost, W):
+    
+    for o in range(size_hidden3):
+            d = dRELU(hidden[2][o])
+            db = d * 2 * cost[0] * 2 * cost[1]
+            hiddenb[2][o] +=  LR * db #+ random.random()
+            
+            etotal = 1
+            for wo in range(size_output):
+                for wi in range(size_hiddenf):
+            
+                    etotal *=  (outputw2[0][wo][wi] + random.random()*2.0)* 2.0 *cost[wo]
+            #print(etotal)    
+            for wo in range(size_hiddenf):
+            
+                etotal *= ( hiddenw2[3][wo][o] + random.random()*2.0)
+            
+            #if W == 9:
+             #   print(etotal) 
+            """nb = 0
+            nbmax = 0
+            if(size_hidden2 < 4):
+                nbmax = 1.0
+            else:
+                nbmax = size_hidden2 * 0.25"""
+            for i in range(size_hidden2):
+                """r = random.random()
+                if (r <= 0.25) and (nb < nbmax):
+                    nb += 1
+                    hidden[1][i] = 0.0"""
+                
+                dw = hidden[1][i] * d * etotal # * cost[c]
+                
+                hiddenw[2][o,i] += LR* dw 
+                
+def backprop42(cost, W):
+    
+    for o in range(size_hidden2):
+            d = dRELU(hidden[1][o])
+            db = d * 2 * cost[0] * 2 * cost[1]
+            hiddenb[1][o] +=  LR * db #+ random.random()
+            
+            etotal = 1
+            for wo in range(size_output):
+                for wi in range(size_hiddenf):
+            
+                    etotal *=  (outputw2[0][wo][wi]+ random.random()*2.0) * 2.0 *cost[wo]
+            #print(etotal)   
+            for wo in range(size_hiddenf):
+                for wi in range(size_hidden3):
+                    etotal *=  (hiddenw2[3][wo][wi] + random.random()*2.0)
+            #print(etotal)    
+            for wo in range(size_hidden3):
+            
+                etotal *= ( hiddenw2[2][wo][o] + random.random()*2.0)
+                
+            #if W == 9:
+            #    print(etotal)
+            
+            """nb = 0
+            nbmax = 0
+            if(size_hidden < 4):
+                nbmax = 1.0
+            else:
+                nbmax = size_hidden * 0.25"""
+            for i in range(size_hidden):
+                """r = random.random()
+                if (r <= 0.25) and (nb < nbmax):
+                    nb += 1
+                    hidden[0][i] = 0.0"""
+                
+                dw = hidden[0][i] * d * etotal # * cost[c]
+                
+                hiddenw[1][o,i] += LR* dw 
+                
+def backprop52(cost, W):
+    
+    #display_test(inputn, 2)
+    
+    for o in range(size_hidden):
+            d = dRELU(hidden[0][o])
+            #print(hidden)
+            db = d * 2 * cost[0] * 2 * cost[1]
+            hiddenb[0][o] +=  LR * db #+ random.random()
+            
+            etotal = 1
+            for wo in range(size_output):
+                for wi in range(size_hiddenf):
+                    #print(outputw2[0][wo][wi])
+                    #print(cost[wo])
+                    etotal *=  (outputw2[0][wo][wi]+ random.random()*2.0) * 2.0 *cost[wo]
+            #print(etotal)   
+            for wo in range(size_hiddenf):
+                for wi in range(size_hidden3):
+                    #print(hiddenw2[3][wo][wi] )
+                    etotal *=  (hiddenw2[3][wo][wi] + random.random()*2.0)
+            #print(etotal)    
+            for wo in range(size_hidden3):
+                for wi in range(size_hidden2):
+                    #print(hiddenw2[2][wo][wi] )
+                    etotal *=  (hiddenw2[2][wo][wi] + random.random()*2.0)
+            #print(etotal)   
+            for wo in range(size_hidden2):
+                #print(hiddenw2[1][wo][wi] )
+                etotal *=  (hiddenw2[1][wo][o] + random.random()*2.0)
+                
+            #print(etotal)
+            #print(hiddenw2)
+            
+            
+            nb = 0
+            nbmax = 0
+            if(size_input < 4):
+                nbmax = 1.0
+            else:
+                nbmax = size_input * 0.25
+            for i in range(size_input):
+                """r = random.random()
+                if (r <= 0.25) and (nb < nbmax):
+                    nb += 1
+                    inputn[i] = 0.0"""
+                
+                dw = inputn[i] * d * etotal # * cost[c]
+                #if W == 9:
+                 #   print("--------dw:" + str(LR*dw)  + " inputn: " + str(inputn[i]) + " d: " + str(d)  + " etotal:" + str(etotal))
+                #if W == 9:
+                #    print(hiddenw[0][o,i])
+                hiddenw[0][o,i] += LR* dw 
+                #if W == 9:
+                #    print(hiddenw[0][o,i])
+                    
+                    
                     
 def BN(inp, size_in, scale, Y):
 
@@ -564,11 +1092,11 @@ def Afficher_images(path_dir, valid, nb, score, pct):
     
     I = 1
     #ListeFichiers = os.listdir(path_dir)
-    plt.figure(figsize=(15.5, 7.6), dpi=100)
+    plt.figure(figsize=(15.5, 14.0), dpi=100)
    
     
     plt.subplot(2,1,1)
-    Img_Pil = img.load_img(path_dir[0], target_size=(200, 200))
+    Img_Pil = img.load_img(path_dir[0], target_size=(150, 150))
     plt.imshow(Img_Pil)
     plt.xticks([])
     plt.yticks([])
@@ -576,11 +1104,11 @@ def Afficher_images(path_dir, valid, nb, score, pct):
     
     for NoImg in range(nb):
                
-        Img_Pil = img.load_img(path_dir[NoImg], target_size=(200, 200))
+        Img_Pil = img.load_img(path_dir[NoImg], target_size=(150, 150))
         #Img_Array = img.img_to_array(Img_Pil)/255
         #Img_List = np.expand_dims(Img_Array, axis=0)
         
-        plt.subplot(4,10,NoImg+1)
+        plt.subplot(10,10,NoImg+1)
         plt.imshow(Img_Pil)
         plt.xticks([])
         plt.yticks([])
@@ -595,14 +1123,14 @@ def Afficher_images(path_dir, valid, nb, score, pct):
     plt.show()
     
 
-def Validation(TESTV, TESTV_out, NORM, valid):
+def Validation(TESTV, TESTV_out, NORM, valid, PATHV, TESTV2, TESTV_out2, PATHV2):
     
     score = 0.0
     score2 = 0.0
     score3 = 0
     score4 = 0
-    nbcat = 20.0
-    nbdog = 20.0
+    nbcat = 50.0
+    nbdog = 50.0
 
     W = 0
     WMAX = 1
@@ -614,68 +1142,126 @@ def Validation(TESTV, TESTV_out, NORM, valid):
     reso3 = 0
     reso4 = 0
     I = 0
-                
-    while not stop:
+    I2=0
+    lotsz = 10
+    ilot = 0
+    alt = True
+    IV = 0
 
-        if change_in:
-            #print(len(TESTV))
+    while not stop:
+        print("I: " + str(I) + " " + str(I2))       
+
+        if alt:
             test2inputn(TESTV[I], inputn)
-            #display_test(inputn, TESTV_out[I])
-            BN(inputn, size_input, NORM, inputn)
-            #display_test(inputn, TESTV_out[I])
-            change_in = False
+        else:
+            test2inputn(TESTV2[I2], inputn)
+
+    
+        for i in range(size_input):
+            #inputn[i] /= 255.0
+            inputn[i] = ((inputn[i])*1000+1) / 10000.0;
+
+        BN(inputn, size_input, NORM, inputn)
+        #display_test(inputn, TESTV_out[I])
+            #change_in = False
+
+        calc_output_RELU(inputn, hiddenw[0], hiddenb[0], size_input, size_hidden, hidden[0])
+        #calc_output_RELU(hidden[0], hiddenw[1], hiddenb[1], size_hidden, size_hidden2, hidden[1])
+        #calc_output_RELU(hidden[1], hiddenw[2], hiddenb[2], size_hidden2, size_hidden3, hidden[2])
+        #calc_output_RELU(hidden[2], hiddenw[3], hiddenb[3], size_hidden3, size_hiddenf, hidden[3])
+        calc_output_RELUF(hidden[0], outputw[0], outputb[0], size_hidden, size_output_bias, output[0])
         
-        calc_output_RELU2(inputn, hiddenw[0], hiddenb[0], size_input, size_hidden, hidden[0])
-        calc_output_RELU2(hidden[0], hiddenw[1], hiddenb[1], size_hidden, size_hidden2, hidden[1])
-        calc_output_RELU2(hidden[1], hiddenw[2], hiddenb[2], size_hidden2, size_hidden3, hidden[2])
-        calc_output_RELU2(hidden[2], hiddenw[3], hiddenb[3], size_hidden3, size_hiddenf, hidden[3])
-        calc_output_RELUF(hidden[3], outputw[0], outputb[0], size_hiddenf, size_output_bias, output[0])
+        """calc_output_RELU(inputn, hiddenw[0], hiddenb[0], size_input, size_hidden, hidden[0])
+        calc_output_RELU(hidden[0], hiddenw[1], hiddenb[1], size_hidden, size_hidden2, hidden[1])
+        calc_output_RELU(hidden[1], hiddenw[2], hiddenb[2], size_hidden2, size_hidden3, hidden[2])
+        calc_output_RELU(hidden[2], hiddenw[3], hiddenb[3], size_hidden3, size_hiddenf, hidden[3])
+        calc_output_RELUF(hidden[3], outputw[0], outputb[0], size_hiddenf, size_output_bias, output[0])"""
+
+        #calc_output_RELU(inputn, hiddenw[0], hiddenb[0], size_input, size_hidden, hidden[0])
+        #calc_output_RELU(hidden[0], hiddenw[1], hiddenb[1], size_hidden, size_hidden2, hidden[1])
+        #calc_output_RELU(hidden[1], hiddenw[2], hiddenb[2], size_hidden2, size_hidden3, hidden[2])
+        #calc_output_RELU(hidden[2], hiddenw[3], hiddenb[3], size_hidden3, size_hiddenf, hidden[3])
+        #calc_output_RELUF(hidden[0], outputw[0], outputb[0], size_hidden, size_output_bias, output[0])
+    
 
         #print(str(I) + " : " + str(output[0]))
         
         
-        maxi = -1
+        maxi = -10000000.0
         resom = -1
         for o in range(size_output):
+            print("resp " + str(o) + " " + str(output[0][o]))
             if output[0][o] > maxi:
                 resom = o+1
                 maxi = output[0][o]
 
+        #abs(output[0][0] - 2.0)
+
+        #print("resp " + str(0) + " " + str(output[0][0]))
+        #if(output[0][0] >= 0.0):
+        #    resom = 1
+        #elif output[0][0] < 0.0:
+        #    resom = 2
+
+        
         name = ""
-        if (TESTV_out[I]) == 1:
-            name = "cat"
-        elif(TESTV_out[I]) == 2:
-            name="dog"
+        if alt:
+            print(PATHV[I]);
+            print("chihuahua")
+            name = "chihuahua"
+        else:
+            print(PATHV2[I2]);
+            name="muffin"
+            print("muffin")
             
         #print(str(I) + " : " + name)
         
         if resom == 1:
             #print("cat")
-            if TESTV_out[I] == 1:
+            if alt:
                 score += 1
-                valid[I] = True
+                print("juste")
+                valid[IV] = True
             else:
-                valid[I] = False
+                valid[IV] = False
+                print("faux")
         elif resom == 2:
             #print("dog")
-            if TESTV_out[I] == 2:
+            if not alt:
+                print("juste")
                 score += 1
-                valid[I] = True
+                valid[IV] = True
             else:
-                valid[I] = False
+                valid[IV] = False
+                print("faux")
 
-        I += 1
+        IV +=1
+        if alt:
+            I += 1
+        else:
+            I2+=1
+
+        ilot+=1
+        if ilot == lotsz:
+            alt = not alt
+            ilot = 0
+
+        
+
+
+
+
         change_in = True
 
         cnt = 0	
         E = 0		
 
-        if I == len(TESTV):
+        if I == len(TESTV) and I2 == len(TESTV2):
             I = 0
             W+=1
-
-            if W == WMAX:
-                stop = True
+            stop = True
+            #if W == WMAX:
+            #    stop = True
                 
 
     pct = float(score/(nbcat+nbdog))*100.0

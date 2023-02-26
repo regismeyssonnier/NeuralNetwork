@@ -10,43 +10,48 @@ def filter_image(imgGray):
 		           [1, 1, 1, 1, 1], 
 		           [1, 1, 1, 1, 1]])
 	"""
+	kernel_contour = np.array([[0,-1,0], 
+                       [-1, 1,-1], 
+                       [0,-1,0]])
+
 	kernelBH = np.array([[1, 1, 1], 
 		           [0, 3, 0], 
 		           [-1, -1, -1]])
 
 	kernelHB = np.array([[-1, -1, -1], 
-		           [0, 3, 0], 
+		           [0, 1, 0], 
 		           [1, 1, 1]])
 
 	kernelGD = np.array([[-1, 0, 1], 
-		             [-1, 3, 1], 
+		             [-1, 1, 1], 
 		             [-1, 0, 1]])
 
 	kernelDG = np.array([[1, 0, -1], 
-		             [1, 3, -1], 
+		             [1, 1, -1], 
 		             [1, 0, -1]])
 
 	kernelDBHD = np.array([[0, 1, 0], 
-		              [1, 3, -1], 
+		              [1, 1, -1], 
 		              [0, -1, 0]])
 
 	kernelDBHG = np.array([[0, 1, 0], 
-		              [-1, 3, 1], 
+		              [-1, 1, 1], 
 		              [0, -1, 0]])
 
 	kernelDHBG = np.array([[0, -1, 0], 
-		              [-1, 3, 1], 
+		              [-1, 1, 1], 
 		              [0, 1, 0]])
 
 	kernelDHBD = np.array([[0, -1, 0], 
-		              [1, 3, -1], 
+		              [1, 1, -1], 
 		              [0, 1, 0]])
 
 	#kernel = kernel/sum(kernel)
 
 	#filter the source image
-	img_rstbh = cv2.filter2D(imgGray,-1,kernelBH)
-	"""img_rsthb = cv2.filter2D(img_rstbh,-1,kernelHB)
+	img_kcont = cv2.filter2D(imgGray,-1,kernel_contour)
+	"""img_rstbh = cv2.filter2D(imgGray,-1,kernelBH)
+	img_rsthb = cv2.filter2D(img_rstbh,-1,kernelHB)
 	img_rstgd = cv2.filter2D(img_rsthb,-1,kernelGD)
 	img_rstdg = cv2.filter2D(img_rstgd,-1,kernelDG)
 
@@ -57,11 +62,11 @@ def filter_image(imgGray):
 	
 	#print(img_rstdhbd[0,0])
 
-	return img_rstbh
+	return img_kcont
 
 def pooling_image(img, w, h, szk):
 	I = 0
-	imr = np.zeros((h/szk, w/szk), dtype=np.uint8)
+	imr = np.zeros((int(h/szk), int(w/szk)), dtype=np.uint8)
 	for i in range(0, h, szk):
 		J = 0
 		for j in range(0, w, szk):
