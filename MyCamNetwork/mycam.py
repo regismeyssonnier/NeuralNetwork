@@ -8,6 +8,8 @@ from facedetection import *
 from glass import *
 from sobel import *
 from filter import *
+from tracker import *
+from ball import *
 
 Reseau_inceptionV3 = tf.keras.applications.InceptionV3()
 
@@ -18,6 +20,9 @@ if not FluxVideo.isOpened():
 
 myface = MyFace()
 myglass = MyGlass()
+mytracker = MyTracker(7)
+myball = MyBall(50, 50, 640, 480)
+
 face_active = False
 its_regis = False
 sobel = False
@@ -29,8 +34,13 @@ grabcut = False
 fft = False
 hough = False
 canny = False
+tracker = False
+init_tracker = False
+game = False
 
+start_time = cv2.getTickCount()
 while 1:
+    
     readok, imgbgr = FluxVideo.read()
 
     if not readok:
@@ -42,6 +52,20 @@ while 1:
     cv.putText(imgbgr640x480, "space identifier esc sortir", (10,460), cv.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 1, cv.LINE_4)
     if its_regis:
         cv.putText(imgbgr640x480, "C'est Regis", (10,50), cv.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2, cv.LINE_4)
+
+    if tracker:
+        if not init_tracker:
+            mytracker.select_roi(imgbgr640x480, 0, 0, 150, 100)
+            init_tracker = True
+        else:
+            imgbgr640x480 = mytracker.update(imgbgr640x480)
+
+    if game and tracker:
+        end_time = (cv2.getTickCount() - start_time) / cv2.getTickFrequency() 
+        #print(end_time)
+        #imgbgr640x480 = cv2.flip(imgbgr640x480, 1)
+        myball.update(imgbgr640x480, end_time, mytracker)
+        start_time = cv2.getTickCount()
 
     if grabcut:
         gc = GrabCutFilter(imgbgr640x480)
@@ -135,9 +159,9 @@ while 1:
        
         
     elif Key == 102:#f
-        face_active = True
+        face_active = not face_active
     elif Key == 103:#g
-        face_active = False
+        game = not game
 
     elif Key == 115:#s
         sobel = not sobel
@@ -166,3 +190,7 @@ while 1:
 
     elif Key == 121: #y
         canny = not canny
+
+    elif Key == 116: #t
+        tracker = not tracker
+        init_tracker = False
