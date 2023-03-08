@@ -34,3 +34,5 @@ There is also an implementation of a neural network in cpp. It manages by batch 
 ## 5. MyCamNetwork
 
 ***Add your own model to detect you with tensorflow !!!!!!!!***
+
+(Look at the wiki)[https://github.com/regismeyssonnier/NeuralNetwork/wiki/MyCamNetwork]
