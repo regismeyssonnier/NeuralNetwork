@@ -114,7 +114,7 @@ class MyNetwork:
         p_path = pathlib.Path(p_url)
 
         img = tf.keras.utils.load_img(
-            p_path, target_size=(self.h, self.h)
+            p_path, target_size=(self.h, self.w)
         )
         img_array = tf.keras.utils.img_to_array(img)
         img_array = tf.expand_dims(img_array, 0) # Create a batch
@@ -139,8 +139,9 @@ class MyNetwork:
 
         img = tf.keras.utils.load_img(
             p_path, target_size=(self.h, self.h)
-        )
-        img_array = tf.keras.utils.img_to_array(img)"""
+        )"""
+        #img_pil = tf.keras.utils.array_to_img(img)
+        #img_array = tf.keras.utils.img_to_array(img_pil)
         img_array = tf.expand_dims(img, 0) # Create a batch
 
         predictions = self.model.predict(img_array)
@@ -154,7 +155,8 @@ class MyNetwork:
 
         if int(np.argmax(score)) == 1:
             print("HEY, C'EST MOI REGIS !!!!!!!!!!")
-
+            return 1
+        return -1
 
 
 

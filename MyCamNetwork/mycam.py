@@ -6,6 +6,8 @@ from mynetwork import *
 from me import *
 from facedetection import *
 from glass import *
+from sobel import *
+from filter import *
 
 Reseau_inceptionV3 = tf.keras.applications.InceptionV3()
 
@@ -18,6 +20,15 @@ myface = MyFace()
 myglass = MyGlass()
 face_active = False
 its_regis = False
+sobel = False
+sobelinv = False
+sobelfilter = 0
+color_filter = -1
+colorf = False
+grabcut = False
+fft = False
+hough = False
+canny = False
 
 while 1:
     readok, imgbgr = FluxVideo.read()
@@ -31,7 +42,43 @@ while 1:
     cv.putText(imgbgr640x480, "space identifier esc sortir", (10,460), cv.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 1, cv.LINE_4)
     if its_regis:
         cv.putText(imgbgr640x480, "C'est Regis", (10,50), cv.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2, cv.LINE_4)
-        
+
+    if grabcut:
+        gc = GrabCutFilter(imgbgr640x480)
+        imgbgr640x480 = gc.get_grabcut()
+
+    if fft:
+        fftf = FFTFilter(imgbgr640x480)
+        imgbgr640x480 = fftf.get_fft()
+
+    if sobel:
+        sobelf = SobelFilter(imgbgr640x480)
+        imgbgr640x480 = sobelf.get_sobel()
+
+    if sobelinv:
+        sobelf = SobelFilter(imgbgr640x480)
+        imgbgr640x480 = sobelf.get_sobel_inv()
+
+    if hough:
+        h = HoughLFilter(imgbgr640x480)
+        imgbgr640x480 = h.get_hough_line()
+
+    if canny:
+        h = CannyFilter(imgbgr640x480)
+        imgbgr640x480 = h.get_edges()
+
+    if colorf:
+        if color_filter == 0:
+            cf = ColorFilter(imgbgr640x480)
+            imgbgr640x480 = cf.get_red_filter()
+        elif color_filter == 1:
+            cf = ColorFilter(imgbgr640x480)
+            imgbgr640x480 = cf.get_green_filter()
+        elif color_filter == 2:
+            cf = ColorFilter(imgbgr640x480)
+            imgbgr640x480 = cf.get_blue_filter()
+
+    
     if face_active:
         imgbgr640x480detf = myface.detect(imgbgr640x480)
         img_gl = myglass.print_glasses(myface.get_faces(), myface.get_eyes(), imgbgr640x480detf)
@@ -76,8 +123,10 @@ while 1:
         cv.imwrite("image/" + str(np.random.randint(2000000000)) + ".png", imgrgb)
 
     elif Key == 114:#r
-        cv.imwrite("image/test.png", imgrgb)
-        if mynet.predict("image/test.png") == 1:
+        #cv.imwrite("image/test.png", imgrgb)
+        #if mynet.predict("image/test.png") == 1:
+        imgrgb180x180 = cv.resize(imgrgb, (180, 180))
+        if mynet.predict_mem(imgrgb180x180) == 1:
             its_regis = True
         else:
             its_regis = False
@@ -85,7 +134,35 @@ while 1:
         cv.imwrite("image/copy/regis/" + str(np.random.randint(2000000000))+".jpg", imgrgb)
        
         
-    elif Key == 102:
+    elif Key == 102:#f
         face_active = True
-    elif Key == 103:
+    elif Key == 103:#g
         face_active = False
+
+    elif Key == 115:#s
+        sobel = not sobel
+        sobelinv = False
+    elif Key == 120:#x
+        sobelinv = not sobelinv
+        sobel = False
+
+    elif Key == 110:#n
+        sobelinv = False
+        sobel = False
+        colorf = False
+        fft = False
+        hough = False
+        canny = False
+
+    elif Key == 99:#c
+        colorf = True
+        color_filter = (color_filter+1)%3
+
+    elif Key == 111:#o
+        fft = not fft
+
+    elif Key == 104: #h
+        hough = not hough
+
+    elif Key == 121: #y
+        canny = not canny
