@@ -73,6 +73,8 @@ class MyBall:
         if distance(Vector(x+bb[2]//2, y+bb[3]//2), Vector(self.pos.x + self.w //2, self.pos.y + self.h // 2)) <= 100:
             if not self.touched:
                 self.v = reflect(self.v, normalize(track.get_v()))
+                #self.v  = Vector((4/3),(4/3)) * self.v + Vector(((1-2)/(2+1)),((1-2)/(2+1))) * track.get_v()
                 self.touched = True
+                print(str(track.get_v().x) + " " + str(track.get_v().y))
         else:
             self.touched = False
