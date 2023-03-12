@@ -11,6 +11,8 @@ Neural network qui détecte si c'est un chihuahua ou un muffin.
 - ⏯️ Lancez **neuralnetsgame.py** pour exécuter le réseau de neurone. .
 
         The best version 👽
+        
+- The other version are obsolete 
 
 ## 2. Installation
 
