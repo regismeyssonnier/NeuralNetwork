@@ -7,7 +7,7 @@ incN2 = 0
 
 MAX_I = 40
 MAX_IM_C = 20
-MAX_RAND = 500
+MAX_RAND = 490
 
 #testd = "archive/dog vs cat/dataset/test_set/dogs/dog."
 #testc = "archive/dog vs cat/dataset/test_set/cats/cat."
@@ -16,9 +16,10 @@ MAX_RAND = 500
 
 testc = "archive/test/chihuahua/chihuahua."
 testm = "archive/test/muffin/muffin."
-trainc ="archive/test/chihuahua/chihuahua." 
-trainm ="archive/test/muffin/muffin." 
-
+trainc ="archive/test/chihuahuasel/chihuahua." 
+trainm ="archive/test/muffinsel/muffin." 
+trains ="archive/flowers/flower_photos/sunflowers/sun."
+trains ="Me/image/copy/regis/regis."
 
 PATH = [testc, testm]
 PN = []
@@ -67,6 +68,76 @@ def load_img_batch(numimg):
 
     for i in range(numimg):
         path2.append(testm + str(NUM2[incN2]) + ".jpg")
+        pn2.append(2)
+        incN2+=1
+
+    return path1, pn1, path2 ,pn2
+
+def load_img_batch_sun(numimg):
+
+    NUM = load_NUM(numimg)
+    NUM2 = load_NUM(numimg)  
+    incN = incN2 = 0
+    pn1 = []
+    path1 = []
+    pn2 = []
+    path2 = []
+    for i in range(numimg):
+        path1.append(testc + str(NUM[incN]) + ".jpg")
+        pn1.append(1)
+        incN+=1
+
+    for i in range(numimg):
+        path2.append(trains + str(NUM2[incN2]) + ".jpg")
+        pn2.append(2)
+        incN2+=1
+
+    return path1, pn1, path2 ,pn2
+
+def load_img_batch_3(numimg):
+
+    NUM = load_NUM(numimg)
+    NUM2 = load_NUM(numimg)  
+    NUM3 = load_NUM(numimg)  
+
+    incN = incN2 = incN3 =0
+    pn1 = []
+    path1 = []
+    pn2 = []
+    path2 = []
+    pn3 = []
+    path3 = []
+    for i in range(numimg):
+        path1.append(testc + str(NUM[incN]) + ".jpg")
+        pn1.append(1)
+        incN+=1
+
+    for i in range(numimg):
+        path2.append(trains + str(NUM2[incN2]) + ".jpg")
+        pn2.append(2)
+        incN2+=1
+
+    for i in range(numimg):
+        path3.append(testm + str(NUM2[incN3]) + ".jpg")
+        pn3.append(3)
+        incN3+=1
+
+    return path1, pn1, path2 ,pn2, path3 ,pn3
+
+def load_img_batch50(numimg):
+
+    incN = incN2 = 0
+    pn1 = []
+    path1 = []
+    pn2 = []
+    path2 = []
+    for i in range(numimg):
+        path1.append(trainc + str(incN) + ".jpg")
+        pn1.append(1)
+        incN+=1
+
+    for i in range(numimg):
+        path2.append(trainm + str(incN2) + ".jpg")
         pn2.append(2)
         incN2+=1
 

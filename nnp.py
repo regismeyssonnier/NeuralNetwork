@@ -3,14 +3,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import random
+import math
 
-size_input = 4096
+size_input = 12288
 inputn = np.zeros(size_input)
 
 #print(inputn)
 
 nb_hidden = 1
-size_hidden = 64
+size_hidden = 128
 size_hidden2 = 4
 size_hidden3 = 4#30#100#44
 size_hiddenf = 4
@@ -31,10 +32,19 @@ hidden2.append(np.zeros(size_hiddenf))
 #print(hidden)
 
 hiddenw = []
+
+"""
 hiddenw.append((np.random.random((size_hidden, size_input))*40.0+1)/100.0)
 hiddenw.append((np.random.random((size_hidden2, size_hidden))*40.0+1)/100.0)
 hiddenw.append((np.random.random((size_hidden3, size_hidden2))*40.0+1)/100.0)
 hiddenw.append((np.random.random((size_hiddenf, size_hidden3))*40.0+1)/100.0)
+"""
+
+#hiddenw.append(np.random.randn(size_hidden, size_input) / np.sqrt(size_hidden))
+#hiddenw.append(np.random.randn(size_hidden, size_input) * np.sqrt(1/size_hidden))
+hiddenw.append(np.random.randn(size_hidden, size_input) / np.sqrt(size_input))
+
+
 #print(hiddenw)
 hiddenw2 = []
 hiddenw2.append(np.zeros((size_hidden, size_input)))
@@ -43,10 +53,16 @@ hiddenw2.append(np.zeros((size_hidden3, size_hidden2)))
 hiddenw2.append(np.zeros((size_hiddenf, size_hidden3)))
 
 hiddenb = []
+hiddenb.append(np.zeros(size_hidden))
+hiddenb.append(np.zeros(size_hidden2))
+hiddenb.append(np.zeros(size_hidden3))
+hiddenb.append(np.zeros(size_hiddenf))
+
+"""
 hiddenb.append((np.random.random(size_hidden)*40.0+1)/100.0)
 hiddenb.append((np.random.random(size_hidden2)*40.0+1)/100.0)
 hiddenb.append((np.random.random(size_hidden3)*40.0+1)/100.0)
-hiddenb.append((np.random.random(size_hiddenf)*40.0+1)/100.0)
+hiddenb.append((np.random.random(size_hiddenf)*40.0+1)/100.0)"""
 #print(hiddenb)
 
 hiddenb2 = []
@@ -59,7 +75,7 @@ sz_hidden = [size_hidden, size_hidden2]#no
 size_hidden_weight = [size_input, size_hidden]#no
 size_hidden_bias = [size_hidden, size_hidden2, size_hidden3, size_hiddenf]#use
 
-size_output = 2
+size_output = 3
 size_output_weight = size_hidden2
 size_output_bias = size_output
 
@@ -70,19 +86,21 @@ output2.append(np.zeros(size_output))
 
 outputw = []
 #outputw.append(np.random.random((size_output, size_hiddenf))*40.0/100.0)
-outputw.append((np.random.random((size_output, size_hidden))*40.0+1)/100.0)
+#outputw.append((np.random.random((size_output, size_hidden))*40.0+1)/100.0)
+outputw.append(np.random.randn(size_output, size_hidden) / np.sqrt(size_hidden))
 
 outputw2 = []
 #outputw2.append(np.zeros((size_output, size_hiddenf)))
 outputw2.append(np.zeros((size_output, size_hidden)))
 
 outputb = []
-outputb.append((np.random.random(size_output)*40.0+1)/100.0)
+#outputb.append((np.random.random(size_output)*40.0+1)/100.0)
+outputb.append(np.zeros(size_output))
 #print(outputb)
 outputb2 = []
 outputb2.append(np.zeros(size_output))
 
-LR = 0.000000000000001
+LR = 0.00001
 LRB =0.0000000000001
 
 TEST = []
@@ -281,6 +299,17 @@ def calc_output_RELU2(inp, hw, hb, size_in, size_out, out):
     #
     #print("-----------------------------------")
 
+def leaky_relu(x, alpha=0.01):
+        return max(alpha*x, x)
+def dleaky_relu(x, alpha=0.01):
+    dx = np.ones_like(x)
+    dx[x < 0] = alpha
+    return dx
+
+def softmax(self, x):
+    exp_x = np.exp(x)
+    return exp_x / np.sum(exp_x)
+
 def calc_output_RELU(inp, hw, hb, size_in, size_out, out):
     #out = np.zeros(size_out)
     I = 0
@@ -290,10 +319,8 @@ def calc_output_RELU(inp, hw, hb, size_in, size_out, out):
         for i in range(size_in):
             ri += inp[i] * hw[o,i]
 
-        out[I]=  RELU( ri + hb[o] ) 
+        out[I]=  leaky_relu( ri + hb[o] ) 
         I += 1
-   
-
 
 def calc_output_RELUF(inp, hw, hb, size_in, size_out, out):
     #out = np.zeros(size_out)
@@ -303,11 +330,113 @@ def calc_output_RELUF(inp, hw, hb, size_in, size_out, out):
         for i in range(size_in):
             ri += inp[i] * hw[o,i]
 
-        out[I] = ri + hb[o]
+        out[I] = leaky_relu(ri + hb[o])
+        I += 1
+
+def calc_output_RELUFSM(inp, hw, hb, size_in, size_out, out):
+    #out = np.zeros(size_out)
+    I = 0
+    for o in range(size_out):
+        ri = 0
+        for i in range(size_in):
+            ri += inp[i] * hw[o,i]
+
+        out[I] = leaky_relu(ri + hb[o])
+        I += 1
+
+    # Appliquer la fonction softmax
+    exp_out = np.exp(out)
+    sum_exp_out = np.sum(exp_out)
+    for o in range(size_out):
+        out[o] = exp_out[o] / sum_exp_out
+
+   
+def calc_output_RELUD(inp, hw, hb, size_in, size_out, out, drop):
+    #out = np.zeros(size_out)
+    I = 0
+    
+    
+    for o in range(size_out):
+        if o in drop:
+            out[I]=0 
+            I += 1
+            continue
+        ri = 0
+        for i in range(size_in):
+            ri += inp[i] * hw[o,i]
+
+        out[I]=  RELU( ri + hb[o] ) 
+        I += 1
+
+def calc_output_RELUFD(inp, hw, hb, size_in, size_out, out, drop):
+    #out = np.zeros(size_out)
+    I = 0
+    for o in range(size_out):
+        ri = 0
+        for i in range(size_in):
+            if i in drop:continue
+            ri += inp[i] * hw[o,i]
+
+        out[I] = RELU(ri + hb[o])
+        I += 1
+
+def calc_output_SG(inp, hw, hb, size_in, size_out, out):
+    #out = np.zeros(size_out)
+    I = 0
+    
+    
+    for o in range(size_out):
+        
+        ri = 0
+        for i in range(size_in):
+            ri += inp[i] * hw[o,i]
+
+        out[I]=  sigmoid( ri + hb[o] ) 
+        I += 1
+
+def calc_output_SGF(inp, hw, hb, size_in, size_out, out):
+    #out = np.zeros(size_out)
+    I = 0
+    for o in range(size_out):
+        ri = 0
+        for i in range(size_in):
+            
+            ri += inp[i] * hw[o,i]
+
+        out[I] = sigmoid(ri + hb[o])
+        I += 1
+          
+def calc_output_SGD(inp, hw, hb, size_in, size_out, out, drop):
+    #out = np.zeros(size_out)
+    I = 0
+    
+    
+    for o in range(size_out):
+        if o in drop:
+            out[I]=0 
+            I += 1
+            continue
+        ri = 0
+        for i in range(size_in):
+            ri += inp[i] * hw[o,i]
+
+        out[I]=  sigmoid( ri + hb[o] ) 
+        I += 1
+
+def calc_output_SGFD(inp, hw, hb, size_in, size_out, out, drop):
+    #out = np.zeros(size_out)
+    I = 0
+    for o in range(size_out):
+        ri = 0
+        for i in range(size_in):
+            if i in drop:continue
+            ri += inp[i] * hw[o,i]
+
+        out[I] = sigmoid(ri + hb[o])
         I += 1
         
     
-    #return out
+   
 
 
 def hidden_backp41(alm1, cost, output, outputw, outputb, size_c, size_out, size_in):
@@ -615,6 +744,30 @@ def backprop5(cost, W):
             
 
 def Backpropagation512(cost):
+
+    dw = 0;
+    for o in range(size_output):
+        for i in range(size_hidden):
+            outputw[0][o, i] -= LR * cost[o] * hidden[0][i]
+
+    for o in range(size_output):
+        outputb[0][o] -=  LR * cost[o]
+
+    print("end output back")
+
+    #hiddenf
+    for o in range(size_output):
+        for f in range(size_hidden):
+            for i in range(size_input):
+                    hiddenw[0][f,i] -= LR * cost[o] * outputw[0][o, f] * dRelu(hidden[0][f]) * inputn[i]
+
+    for o in range(size_output):
+        for f in range(size_hidden):
+            hiddenb[0][f] -= LR * cost[o] * outputw[0][o, f] * dRelu(hidden[0][f]) 
+
+    print("end hiddenf back")
+
+def Backpropagation512sig(cost):
 
     dw = 0;
     for o in range(size_output):
@@ -1122,6 +1275,39 @@ def Afficher_images(path_dir, valid, nb, score, pct):
                     
     plt.show()
     
+def Afficher_images2(path_dir, valid, nb, score, pct):
+    
+    I = 1
+    #ListeFichiers = os.listdir(path_dir)
+    plt.figure(figsize=(15.5, 14.0), dpi=100)
+   
+    
+    plt.subplot(2,1,1)
+    Img_Pil = img.load_img(path_dir[0], target_size=(50, 50))
+    plt.imshow(Img_Pil)
+    plt.xticks([])
+    plt.yticks([])
+    plt.title(str(score) + "/" + str(nb) + " soit " + str(pct) + "%" , size=10, color="Blue")
+    
+    for NoImg in range(nb):
+               
+        Img_Pil = img.load_img(path_dir[NoImg], target_size=(50, 50))
+        #Img_Array = img.img_to_array(Img_Pil)/255
+        #Img_List = np.expand_dims(Img_Array, axis=0)
+        
+        plt.subplot(10,int(math.ceil(nb / 10)),NoImg+1)
+        plt.imshow(Img_Pil)
+        plt.xticks([])
+        plt.yticks([])
+        
+        if valid[NoImg]:
+            plt.title('Bien ' + str(I) + '/' + str(nb),  size=7, color="Green")
+            #plt.title(str(I), pad=1, size=10, color="Blue")
+            I += 1
+        else:
+            plt.title('Mal classe',  size=7, color="Red")
+                    
+    plt.show()
 
 def Validation(TESTV, TESTV_out, NORM, valid, PATHV, TESTV2, TESTV_out2, PATHV2):
     
@@ -1157,19 +1343,24 @@ def Validation(TESTV, TESTV_out, NORM, valid, PATHV, TESTV2, TESTV_out2, PATHV2)
             test2inputn(TESTV2[I2], inputn)
 
     
-        for i in range(size_input):
+        #for i in range(size_input):
             #inputn[i] /= 255.0
-            inputn[i] = ((inputn[i])*1000+1) / 10000.0;
+            #inputn[i] = ((inputn[i])*1000+1) / 10000.0;
 
-        BN(inputn, size_input, NORM, inputn)
+        #BN(inputn, size_input, NORM, inputn)
         #display_test(inputn, TESTV_out[I])
             #change_in = False
 
-        calc_output_RELU(inputn, hiddenw[0], hiddenb[0], size_input, size_hidden, hidden[0])
+        
+
+        #calc_output_RELU(inputn, hiddenw[0], hiddenb[0], size_input, size_hidden, hidden[0])
         #calc_output_RELU(hidden[0], hiddenw[1], hiddenb[1], size_hidden, size_hidden2, hidden[1])
         #calc_output_RELU(hidden[1], hiddenw[2], hiddenb[2], size_hidden2, size_hidden3, hidden[2])
         #calc_output_RELU(hidden[2], hiddenw[3], hiddenb[3], size_hidden3, size_hiddenf, hidden[3])
-        calc_output_RELUF(hidden[0], outputw[0], outputb[0], size_hidden, size_output_bias, output[0])
+        #calc_output_RELUF(hidden[0], outputw[0], outputb[0], size_hidden, size_output_bias, output[0])
+
+        calc_output_SG(inputn, hiddenw[0], hiddenb[0], size_input, size_hidden, hidden[0])
+        calc_output_SGF(hidden[0], outputw[0], outputb[0], size_hidden, size_output_bias, output[0])
         
         """calc_output_RELU(inputn, hiddenw[0], hiddenb[0], size_input, size_hidden, hidden[0])
         calc_output_RELU(hidden[0], hiddenw[1], hiddenb[1], size_hidden, size_hidden2, hidden[1])
@@ -1189,7 +1380,9 @@ def Validation(TESTV, TESTV_out, NORM, valid, PATHV, TESTV2, TESTV_out2, PATHV2)
         
         maxi = -10000000.0
         resom = -1
+        sum = 0
         for o in range(size_output):
+            sum += output[0][o]
             print("resp " + str(o) + " " + str(output[0][o]))
             if output[0][o] > maxi:
                 resom = o+1
@@ -1221,19 +1414,25 @@ def Validation(TESTV, TESTV_out, NORM, valid, PATHV, TESTV2, TESTV_out2, PATHV2)
             if alt:
                 score += 1
                 print("juste")
+                
                 valid[IV] = True
             else:
                 valid[IV] = False
                 print("faux")
+            pct = (output[0][0] / sum) * 100
+            print("pct : " + str(pct) + "%")
         elif resom == 2:
             #print("dog")
             if not alt:
                 print("juste")
+                
                 score += 1
                 valid[IV] = True
             else:
                 valid[IV] = False
                 print("faux")
+            pct = (output[0][1] / sum) * 100
+            print("pct : " + str(pct) + "%")
 
         IV +=1
         if alt:
@@ -1270,6 +1469,403 @@ def Validation(TESTV, TESTV_out, NORM, valid, PATHV, TESTV2, TESTV_out2, PATHV2)
     print("---------------------------------------------------------------------------------")
 
     return score, pct
+
+
+
+def Validation3(TESTV, TESTV_out, NORM, valid, PATHV, TESTV2, TESTV_out2, PATHV2, TESTV3, TESTV_out3, PATHV3):
+    
+    score = 0.0
+    score2 = 0.0
+    score3 = 0
+    score4 = 0
+    nbcat = 50.0
+    nbdog = 50.0
+
+    W = 0
+    WMAX = 1
+    stop = False
+    change_in = True
+    R = [0, 0]
+    reso = 0
+    reso2 = 0.0
+    reso3 = 0
+    reso4 = 0
+    I = 0
+    I2=0
+    I3=0
+    lotsz = 32
+    ilot = 0
+    alt = 1
+    IV = 0
+
+    while not stop:
+        print("I: " + str(I) + " " + str(I2))       
+
+        if alt==1:
+            test2inputn(TESTV[I], inputn)
+        elif alt ==2:
+            test2inputn(TESTV2[I2], inputn)
+
+        else:
+            test2inputn(TESTV3[I3], inputn)
+    
+        #for i in range(size_input):
+            #inputn[i] /= 255.0
+            #inputn[i] = ((inputn[i])*1000+1) / 10000.0;
+
+        #BN(inputn, size_input, NORM, inputn)
+        #display_test(inputn, TESTV_out[I])
+            #change_in = False
+
+        
+
+        calc_output_RELU(inputn, hiddenw[0], hiddenb[0], size_input, size_hidden, hidden[0])
+        #calc_output_RELU(hidden[0], hiddenw[1], hiddenb[1], size_hidden, size_hidden2, hidden[1])
+        #calc_output_RELU(hidden[1], hiddenw[2], hiddenb[2], size_hidden2, size_hidden3, hidden[2])
+        #calc_output_RELU(hidden[2], hiddenw[3], hiddenb[3], size_hidden3, size_hiddenf, hidden[3])
+        calc_output_RELUF(hidden[0], outputw[0], outputb[0], size_hidden, size_output_bias, output[0])
+
+        #calc_output_SG(inputn, hiddenw[0], hiddenb[0], size_input, size_hidden, hidden[0])
+        #calc_output_SGF(hidden[0], outputw[0], outputb[0], size_hidden, size_output_bias, output[0])
+        
+        """calc_output_RELU(inputn, hiddenw[0], hiddenb[0], size_input, size_hidden, hidden[0])
+        calc_output_RELU(hidden[0], hiddenw[1], hiddenb[1], size_hidden, size_hidden2, hidden[1])
+        calc_output_RELU(hidden[1], hiddenw[2], hiddenb[2], size_hidden2, size_hidden3, hidden[2])
+        calc_output_RELU(hidden[2], hiddenw[3], hiddenb[3], size_hidden3, size_hiddenf, hidden[3])
+        calc_output_RELUF(hidden[3], outputw[0], outputb[0], size_hiddenf, size_output_bias, output[0])"""
+
+        #calc_output_RELU(inputn, hiddenw[0], hiddenb[0], size_input, size_hidden, hidden[0])
+        #calc_output_RELU(hidden[0], hiddenw[1], hiddenb[1], size_hidden, size_hidden2, hidden[1])
+        #calc_output_RELU(hidden[1], hiddenw[2], hiddenb[2], size_hidden2, size_hidden3, hidden[2])
+        #calc_output_RELU(hidden[2], hiddenw[3], hiddenb[3], size_hidden3, size_hiddenf, hidden[3])
+        #calc_output_RELUF(hidden[0], outputw[0], outputb[0], size_hidden, size_output_bias, output[0])
+    
+
+        #print(str(I) + " : " + str(output[0]))
+        
+        
+        maxi = -10000000.0
+        resom = -1
+        sum = 0
+        for o in range(size_output):
+            sum += output[0][o]
+            print("resp " + str(o) + " " + str(output[0][o]))
+            if output[0][o] > maxi:
+                resom = o+1
+                maxi = output[0][o]
+
+        #abs(output[0][0] - 2.0)
+
+        #print("resp " + str(0) + " " + str(output[0][0]))
+        #if(output[0][0] >= 0.0):
+        #    resom = 1
+        #elif output[0][0] < 0.0:
+        #    resom = 2
+
+        
+        name = ""
+        if alt == 1:
+            print(PATHV[I]);
+            print("chihuahua")
+            name = "chihuahua"
+        elif alt == 2:
+            print(PATHV2[I2]);
+            name="fleur"
+            print("fleur")
+        else:
+            print(PATHV3[I3]);
+            name="muffin"
+            print("muffin")
+            
+        #print(str(I) + " : " + name)
+        
+        if resom == 1:
+            #print("cat")
+            if alt == 1:
+                score += 1
+                print("juste")
+                
+                valid[IV] = True
+            else:
+                valid[IV] = False
+                print("faux")
+            pct = (output[0][0] / sum) * 100
+            print("pct : " + str(pct) + "%")
+        elif resom == 2:
+            #print("dog")
+            if alt == 2:
+                print("juste")
+                
+                score += 1
+                valid[IV] = True
+            else:
+                valid[IV] = False
+                print("faux")
+            pct = (output[0][1] / sum) * 100
+            print("pct : " + str(pct) + "%")
+        elif resom == 3:
+            #print("dog")
+            if alt == 3:
+                print("juste")
+                
+                score += 1
+                valid[IV] = True
+            else:
+                valid[IV] = False
+                print("faux")
+            pct = (output[0][2] / sum) * 100
+            print("pct : " + str(pct) + "%")
+
+        IV +=1
+        if alt == 1:
+            I += 1
+        elif alt == 2:
+            I2+=1
+        elif alt == 3:
+            I3+=1
+
+        ilot+=1
+        if ilot == lotsz:
+            alt += 1
+            if alt == 4:
+                alt = 1
+            ilot = 0
+
+        
+
+
+
+
+        change_in = True
+
+        cnt = 0	
+        E = 0		
+
+        if I == len(TESTV) and I2 == len(TESTV2) and I3 == len(TESTV3):
+            I = 0
+            W+=1
+            stop = True
+            #if W == WMAX:
+            #    stop = True
+                
+
+    pct = float(score/150.0)*100.0
+    print("Algo Score:" + str(score) + "/" + str(150) + " soit " + str(pct) + "%")
+    
+    print("---------------------------------------------------------------------------------")
+
+    return score, pct
+
+
+def ValidationNN(nn, TESTV, TESTV_out, NORM, valid, PATHV, TESTV2, TESTV_out2, PATHV2, TESTV3, TESTV_out3, PATHV3, res):
+    
+    score = 0.0
+    score2 = 0.0
+    score3 = 0
+    score4 = 0
+    nbcat = 50.0
+    nbdog = 50.0
+
+    W = 0
+    WMAX = 1
+    stop = False
+    change_in = True
+    R = [0, 0]
+    reso = 0
+    reso2 = 0.0
+    reso3 = 0
+    reso4 = 0
+    I = 0
+    I2=0
+    I3=0
+    lotsz = 32
+    ilot = 0
+    alt = 1
+    IV = 0
+
+    nn.init_F1()
+
+    while not stop:
+        print("I: " + str(I) + " " + str(I2) + " " + str(I3))       
+
+        if alt == 1:
+            nn.build(np.array(TESTV[I]))
+                      
+        elif alt == 2:
+            nn.build(np.array(TESTV2[I2]))
+           
+        else:
+            nn.build(np.array(TESTV3[I3]))
+
+        nn.BN(1.0)
+
+        #for i in range(size_input):
+            #inputn[i] /= 255.0
+            #inputn[i] = ((inputn[i])*1000+1) / 10000.0;
+
+        #BN(inputn, size_input, NORM, inputn)
+        #display_test(inputn, TESTV_out[I])
+            #change_in = False
+
+        nn.predict_softmax()
+
+        #calc_output_RELU(inputn, hiddenw[0], hiddenb[0], size_input, size_hidden, hidden[0])
+        #calc_output_RELU(hidden[0], hiddenw[1], hiddenb[1], size_hidden, size_hidden2, hidden[1])
+        #calc_output_RELU(hidden[1], hiddenw[2], hiddenb[2], size_hidden2, size_hidden3, hidden[2])
+        #calc_output_RELU(hidden[2], hiddenw[3], hiddenb[3], size_hidden3, size_hiddenf, hidden[3])
+        #calc_output_RELUF(hidden[0], outputw[0], outputb[0], size_hidden, size_output_bias, output[0])
+
+        #calc_output_SG(inputn, hiddenw[0], hiddenb[0], size_input, size_hidden, hidden[0])
+        #calc_output_SGF(hidden[0], outputw[0], outputb[0], size_hidden, size_output_bias, output[0])
+        
+        """calc_output_RELU(inputn, hiddenw[0], hiddenb[0], size_input, size_hidden, hidden[0])
+        calc_output_RELU(hidden[0], hiddenw[1], hiddenb[1], size_hidden, size_hidden2, hidden[1])
+        calc_output_RELU(hidden[1], hiddenw[2], hiddenb[2], size_hidden2, size_hidden3, hidden[2])
+        calc_output_RELU(hidden[2], hiddenw[3], hiddenb[3], size_hidden3, size_hiddenf, hidden[3])
+        calc_output_RELUF(hidden[3], outputw[0], outputb[0], size_hiddenf, size_output_bias, output[0])"""
+
+        #calc_output_RELU(inputn, hiddenw[0], hiddenb[0], size_input, size_hidden, hidden[0])
+        #calc_output_RELU(hidden[0], hiddenw[1], hiddenb[1], size_hidden, size_hidden2, hidden[1])
+        #calc_output_RELU(hidden[1], hiddenw[2], hiddenb[2], size_hidden2, size_hidden3, hidden[2])
+        #calc_output_RELU(hidden[2], hiddenw[3], hiddenb[3], size_hidden3, size_hiddenf, hidden[3])
+        #calc_output_RELUF(hidden[0], outputw[0], outputb[0], size_hidden, size_output_bias, output[0])
+    
+
+        #print(str(I) + " : " + str(output[0]))
+        
+        
+        maxi = -10000000.0
+        resom = -1
+        sum = 0
+        for o in range(nn.size_output):
+            sum += nn.layero[o]
+            print("resp " + str(o) + " " + str(nn.layero[o]))
+            if nn.layero[o] > maxi:
+                resom = o+1
+                maxi = nn.layero[o]
+
+        
+        
+        name = ""
+        if alt == 1:
+            print(PATHV[I]);
+            print("chihuahua")
+            name = "chihuahua"
+            if resom != alt:
+                nn.fn += 1
+        elif alt == 2:
+            print(PATHV2[I2]);
+            name="fleur"
+            print("fleur")
+            if resom != alt:
+                nn.fn += 1
+        elif alt == 3:
+            print(PATHV3[I3]);
+            name="muffin"
+            print("muffin")
+            if resom != alt:
+                nn.fn += 1
+            
+        #print(str(I) + " : " + name)
+
+        
+        
+        if resom == 1:
+            #print("cat")
+            if alt == 1:
+                score += 1
+                res[0] +=1
+                print("juste")
+                nn.tp+=1
+                valid[IV] = True
+            else:
+                valid[IV] = False
+                print("faux")
+                nn.fp += 1
+            pct = (nn.layero[0] / sum) * 100
+            print("pct : " + str(pct) + "%")
+        elif resom == 2:
+            #print("dog")
+            if alt == 2:
+                print("juste")
+                nn.tp+=1
+                res[1] +=1
+                score += 1
+                valid[IV] = True
+            else:
+                valid[IV] = False
+                nn.fp += 1
+                print("faux")
+            pct = (nn.layero[1] / sum) * 100
+            print("pct : " + str(pct) + "%")
+        elif resom == 3:
+            #print("dog")
+            if alt == 3:
+                print("juste")
+                nn.tp+=1
+                res[2] +=1
+                score += 1
+                valid[IV] = True
+            else:
+                valid[IV] = False
+                nn.fp += 1
+                print("faux")
+            pct = (nn.layero[2] / sum) * 100
+            print("pct : " + str(pct) + "%")
+        elif resom == 4:
+            print("autre")
+            valid[IV] = False
+
+        IV +=1
+        if alt == 1:
+            I += 1
+        elif alt == 2:
+            I2+=1
+        elif alt == 3:
+            I3+=1
+
+        ilot+=1
+        if ilot == lotsz:
+            alt += 1
+            if alt == 4:
+                alt = 1
+            ilot = 0
+
+        
+
+
+
+
+        change_in = True
+
+        cnt = 0	
+        E = 0		
+
+        if I == len(TESTV) and I2 == len(TESTV2) and I3 == len(TESTV3):
+            I = 0
+            W+=1
+            stop = True
+            #if W == WMAX:
+            #    stop = True
+                
+
+    pct = float(score/192.0)*100.0
+    print("Algo Score:" + str(score) + "/" + str(192) + " soit " + str(pct) + "%")
+    print("F1 score : " + str(nn.F1_score()))
+    print("---------------------------------------------------------------------------------")
+
+    return score, pct
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -15,7 +15,7 @@ def filter_image(imgGray):
                        [0,-1,0]])
 
 	kernelBH = np.array([[1, 1, 1], 
-		           [0, 3, 0], 
+		           [0, 1, 0], 
 		           [-1, -1, -1]])
 
 	kernelHB = np.array([[-1, -1, -1], 
@@ -49,9 +49,9 @@ def filter_image(imgGray):
 	#kernel = kernel/sum(kernel)
 
 	#filter the source image
-	img_kcont = cv2.filter2D(imgGray,-1,kernel_contour)
-	"""img_rstbh = cv2.filter2D(imgGray,-1,kernelBH)
-	img_rsthb = cv2.filter2D(img_rstbh,-1,kernelHB)
+	#img_kcont = cv2.filter2D(imgGray,-1,kernel_contour)
+	img_rstbh = cv2.filter2D(imgGray,-1,kernelBH)
+	"""img_rsthb = cv2.filter2D(img_rstbh,-1,kernelHB)
 	img_rstgd = cv2.filter2D(img_rsthb,-1,kernelGD)
 	img_rstdg = cv2.filter2D(img_rstgd,-1,kernelDG)
 
@@ -62,7 +62,7 @@ def filter_image(imgGray):
 	
 	#print(img_rstdhbd[0,0])
 
-	return img_kcont
+	return img_rstbh
 
 def pooling_image(img, w, h, szk):
 	I = 0
@@ -70,16 +70,20 @@ def pooling_image(img, w, h, szk):
 	for i in range(0, h, szk):
 		J = 0
 		for j in range(0, w, szk):
+			
 			#----------------------
-			mini = 1000
+			mini = -10000000000000000
 			for k in range(szk):
 				for l in range(szk):
 					if ((i+k) < h) and ((j+l) < w):
-						if img[i+k, j+l] < mini:
+						if img[i+k, j+l] > mini:
 							mini = img[i+k, j+l]
 			
-			if ((i+k) < h) and ((j+l) < w):				
-				imr[I, J] = mini
+			#if ((i+k) < h) and ((j+l) < w):
+			#print(mini)		
+			#if mini <= 0:mini = 0
+			#else: mini = 1
+			imr[I, J] = mini
 			J +=1
 		I += 1
 		
