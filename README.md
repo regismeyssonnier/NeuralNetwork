@@ -18,7 +18,7 @@ Neural network qui détecte si c'est un chihuahua ou un muffin.
 
 DOWNLOAD ⏬ archive.zip to
 https://www.kaggle.com/
-The pack : chihuhua vs muffin
+The pack : chihuhua vs muffin, flowers or take you in picture.
 
 - need to **rename** the image in test_set file: chihuhua.1.jpg to muffin.1000.jpg and the same for the dog 🐱 🐶
     
