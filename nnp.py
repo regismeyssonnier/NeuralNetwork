@@ -1678,7 +1678,13 @@ def ValidationNN(nn, TESTV, TESTV_out, NORM, valid, PATHV, TESTV2, TESTV_out2, P
     I = 0
     I2=0
     I3=0
-    lotsz = 32
+    lotsz = 64
+
+    indalt = 0
+    talt = [1, 2, 3]
+    random.shuffle(talt)
+    
+
     ilot = 0
     alt = 1
     IV = 0
@@ -1688,48 +1694,18 @@ def ValidationNN(nn, TESTV, TESTV_out, NORM, valid, PATHV, TESTV2, TESTV_out2, P
     while not stop:
         print("I: " + str(I) + " " + str(I2) + " " + str(I3))       
 
-        if alt == 1:
+        if talt[indalt] == 1 :
             nn.build(np.array(TESTV[I]))
                       
-        elif alt == 2:
+        elif talt[indalt] == 2  :
             nn.build(np.array(TESTV2[I2]))
            
-        else:
+        elif talt[indalt] == 3  :
             nn.build(np.array(TESTV3[I3]))
 
-        nn.BN(1.0)
+        #nn.BN(1.0)
 
-        #for i in range(size_input):
-            #inputn[i] /= 255.0
-            #inputn[i] = ((inputn[i])*1000+1) / 10000.0;
-
-        #BN(inputn, size_input, NORM, inputn)
-        #display_test(inputn, TESTV_out[I])
-            #change_in = False
-
-        nn.predict_softmax()
-
-        #calc_output_RELU(inputn, hiddenw[0], hiddenb[0], size_input, size_hidden, hidden[0])
-        #calc_output_RELU(hidden[0], hiddenw[1], hiddenb[1], size_hidden, size_hidden2, hidden[1])
-        #calc_output_RELU(hidden[1], hiddenw[2], hiddenb[2], size_hidden2, size_hidden3, hidden[2])
-        #calc_output_RELU(hidden[2], hiddenw[3], hiddenb[3], size_hidden3, size_hiddenf, hidden[3])
-        #calc_output_RELUF(hidden[0], outputw[0], outputb[0], size_hidden, size_output_bias, output[0])
-
-        #calc_output_SG(inputn, hiddenw[0], hiddenb[0], size_input, size_hidden, hidden[0])
-        #calc_output_SGF(hidden[0], outputw[0], outputb[0], size_hidden, size_output_bias, output[0])
-        
-        """calc_output_RELU(inputn, hiddenw[0], hiddenb[0], size_input, size_hidden, hidden[0])
-        calc_output_RELU(hidden[0], hiddenw[1], hiddenb[1], size_hidden, size_hidden2, hidden[1])
-        calc_output_RELU(hidden[1], hiddenw[2], hiddenb[2], size_hidden2, size_hidden3, hidden[2])
-        calc_output_RELU(hidden[2], hiddenw[3], hiddenb[3], size_hidden3, size_hiddenf, hidden[3])
-        calc_output_RELUF(hidden[3], outputw[0], outputb[0], size_hiddenf, size_output_bias, output[0])"""
-
-        #calc_output_RELU(inputn, hiddenw[0], hiddenb[0], size_input, size_hidden, hidden[0])
-        #calc_output_RELU(hidden[0], hiddenw[1], hiddenb[1], size_hidden, size_hidden2, hidden[1])
-        #calc_output_RELU(hidden[1], hiddenw[2], hiddenb[2], size_hidden2, size_hidden3, hidden[2])
-        #calc_output_RELU(hidden[2], hiddenw[3], hiddenb[3], size_hidden3, size_hiddenf, hidden[3])
-        #calc_output_RELUF(hidden[0], outputw[0], outputb[0], size_hidden, size_output_bias, output[0])
-    
+        nn.predict_softmax_norm2()
 
         #print(str(I) + " : " + str(output[0]))
         
@@ -1747,19 +1723,19 @@ def ValidationNN(nn, TESTV, TESTV_out, NORM, valid, PATHV, TESTV2, TESTV_out2, P
         
         
         name = ""
-        if alt == 1:
+        if talt[indalt] == 1:
             print(PATHV[I]);
             print("chihuahua")
             name = "chihuahua"
             if resom != alt:
                 nn.fn += 1
-        elif alt == 2:
+        elif talt[indalt] == 2:
             print(PATHV2[I2]);
             name="fleur"
             print("fleur")
             if resom != alt:
                 nn.fn += 1
-        elif alt == 3:
+        elif talt[indalt] == 3:
             print(PATHV3[I3]);
             name="muffin"
             print("muffin")
@@ -1772,7 +1748,7 @@ def ValidationNN(nn, TESTV, TESTV_out, NORM, valid, PATHV, TESTV2, TESTV_out2, P
         
         if resom == 1:
             #print("cat")
-            if alt == 1:
+            if talt[indalt] == 1:
                 score += 1
                 res[0] +=1
                 print("juste")
@@ -1786,7 +1762,7 @@ def ValidationNN(nn, TESTV, TESTV_out, NORM, valid, PATHV, TESTV2, TESTV_out2, P
             print("pct : " + str(pct) + "%")
         elif resom == 2:
             #print("dog")
-            if alt == 2:
+            if talt[indalt] == 2:
                 print("juste")
                 nn.tp+=1
                 res[1] +=1
@@ -1800,7 +1776,7 @@ def ValidationNN(nn, TESTV, TESTV_out, NORM, valid, PATHV, TESTV2, TESTV_out2, P
             print("pct : " + str(pct) + "%")
         elif resom == 3:
             #print("dog")
-            if alt == 3:
+            if talt[indalt] == 3:
                 print("juste")
                 nn.tp+=1
                 res[2] +=1
@@ -1817,24 +1793,22 @@ def ValidationNN(nn, TESTV, TESTV_out, NORM, valid, PATHV, TESTV2, TESTV_out2, P
             valid[IV] = False
 
         IV +=1
-        if alt == 1:
+        if talt[indalt] == 1:
             I += 1
-        elif alt == 2:
+        elif talt[indalt] == 2:
             I2+=1
-        elif alt == 3:
+        elif talt[indalt] == 3:
             I3+=1
+
+        indalt += 1
+        if indalt == 3:
+            indalt = 0
+            random.shuffle(talt)
 
         ilot+=1
         if ilot == lotsz:
-            alt += 1
-            if alt == 4:
-                alt = 1
             ilot = 0
-
-        
-
-
-
+                    
 
         change_in = True
 

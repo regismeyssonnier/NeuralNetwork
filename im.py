@@ -10,9 +10,10 @@ TEST = []
 TEST_out = []
 SIZE_I = 16
 MAX_IMG_SQ = 2
+IMG = 0
 
 def load_image(name):
-
+	
 	
 	img = cv2.imread(name)
 	print(name)
@@ -27,9 +28,10 @@ def load_image(name):
 
 def load_image_filter(name):
 
-	
+	global IMG
 	img = cv2.imread(name)
-	print(name)
+	print(name + " " + str(IMG))
+	IMG+=1
 	if img is None:
 		print('Failed to load image file:', name)
 		sys.exit(1)
@@ -76,7 +78,7 @@ def load_image_filter(name):
 
 def load_image_filter_k(name):
 
-	
+	global IMG
 	"""img = cv2.imread(name)
 	print(name)
 	if img is None:
@@ -89,9 +91,10 @@ def load_image_filter_k(name):
 	#print(imres)
 	#imres = imres.reshape((258, 258, 3))
 	#print(imres.shape)
-	print(name)
+	print(name + " " + str(IMG))
+	IMG+=1
 	img = tf.keras.utils.load_img(
-		name, target_size=(180, 180)
+		name, target_size=(256, 256)
 	)
 	img_array = tf.keras.utils.img_to_array(img)
 	img_array = tf.expand_dims(img_array, 0)
@@ -99,12 +102,17 @@ def load_image_filter_k(name):
 	model = tf.keras.models.Sequential([
 	
 		tf.keras.layers.Rescaling(1./255),
-                tf.keras.layers.Conv2D(32, 3, activation='relu'),
-                tf.keras.layers.MaxPooling2D(),
-                tf.keras.layers.Conv2D(32, 3, activation='relu'),
-                tf.keras.layers.MaxPooling2D(),
-                tf.keras.layers.Conv2D(32, 3, activation='relu'),
-                tf.keras.layers.MaxPooling2D(),
+    tf.keras.layers.Conv2D(4, 11, activation='relu', strides=(1,1), padding="same"),
+    tf.keras.layers.MaxPooling2D(),
+    tf.keras.layers.Conv2D(8, 7, activation='relu', strides=(1,1), padding="same"),
+    tf.keras.layers.MaxPooling2D(),
+    tf.keras.layers.Conv2D(16, 5, activation='relu', strides=(1,1), padding="same"),
+    tf.keras.layers.MaxPooling2D(),
+    tf.keras.layers.Conv2D(32, 3, activation='relu', strides=(1,1), padding="same"),
+    tf.keras.layers.MaxPooling2D(),
+    tf.keras.layers.Conv2D(64, 3, activation='relu', strides=(1,1), padding="same"),
+    tf.keras.layers.MaxPooling2D(),
+		
 	#tf.keras.layers.Conv2D(16, (3, 3), activation='relu'),
     #tf.keras.layers.MaxPooling2D((2, 2)),
 
@@ -112,22 +120,30 @@ def load_image_filter_k(name):
     tf.keras.layers.Flatten()
 
 	])
-
+	
+	"""tf.keras.layers.Rescaling(1./255),
+                tf.keras.layers.Conv2D(32, 3, activation='relu'),
+                tf.keras.layers.MaxPooling2D(),
+                tf.keras.layers.Conv2D(32, 3, activation='relu'),
+                tf.keras.layers.MaxPooling2D(),
+                tf.keras.layers.Conv2D(32, 3, activation='relu'),
+                tf.keras.layers.MaxPooling2D(),"""
 	
 
 	imp = model.predict(img_array)
+	#print(imp)
 	#model.summary()
 	#print(imp)
 	#model.summary()
 	#print(imp.shape)
-	impr = np.zeros(12800, dtype=np.uint8)
+	impr = np.zeros(4096, dtype=np.float)
 	ind = 0
 	"""for i in range(16):
 		for j in  range(16):
 			impr[i, j] = imp[0][ind]
 			ind +=1"""
 
-	for i in range(12800):
+	for i in range(4096):
 		impr[i] = imp[0][i]
 			
 
@@ -249,18 +265,18 @@ def load_image_one_filter_rand(nm, num):
 	numero = []
 	
 	
-	im = load_image_filter(nm)
+	im = load_image_filter_k(nm)
 
-	imf = []
+	"""imf = []
 	for i in range(SIZE_I):
 		for j in range(SIZE_I):
 			pix = float(im[i, j]/255.0)
 			#pix = float(im[i, j])
 			#if pix >= 0.5:pix = 1.0
 			#else:pix = 0.0
-			imf.append(pix) 
+			imf.append(pix)"""
 
-	croix.append(imf)
+	croix.append(im)
 	numero.append(num)
 
 	return croix, numero
@@ -782,8 +798,31 @@ def create_test_tab_one_filter_rand_batch_train(num):
 
     return test1, test_out1, path1, test2, test_out2, path2
 
-def create_test_tab_one_filter_rand_batch_train3(num):	
+def Normalize_img_batch(TEST, bsz):
+    eps=1e-5
+    batch_size = bsz
+    n_batches = len(TEST) // batch_size
+    if len(TEST) % batch_size != 0:
+        n_batches += 1
+    X_batches = np.array_split(TEST, n_batches)
 
+    # Normaliser chaque mini-batch
+    for i in range(n_batches):
+        # Calcule la moyenne et la variance de chaque mini-batch
+        batch_mean = np.mean(X_batches[i])
+        batch_var = np.var(X_batches[i])
+    
+        # Normalise chaque mini-batch
+        X_batches[i] = (X_batches[i] - batch_mean) / np.sqrt(batch_var + eps)
+
+    # Fusionner les mini-batchs normalisés
+    X_normalized = np.concatenate(X_batches, axis=0)
+
+    return X_normalized
+
+def create_test_tab_one_filter_rand_batch_train3(num):	
+    global IMG
+    IMG=0
     test1 = []
     test_out1 = []
     test2 = []
