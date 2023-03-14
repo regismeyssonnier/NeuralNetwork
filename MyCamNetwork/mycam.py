@@ -3,6 +3,7 @@ import tensorflow as tf
 import numpy as np
 import cv2 as cv
 import threading
+import queue
 from mynetwork import *
 from me import *
 from facedetection import *
@@ -13,6 +14,11 @@ from tracker import *
 from ball import *
 from mysound import *
 from myaudio import *
+from myrecognition import *
+from myspeech import *
+
+num_commande = ""
+its_regis = False
 
 def qui_cest():
     mysound = MySound("temp/qui.wav")
@@ -25,7 +31,27 @@ def qui_cest():
         if mynet.predict_mem(imgrgb180x180) == 1:
             mysound = MySound("./regis.wav")
             mysound.play()
-       
+            global its_regis
+            its_regis = True
+
+
+def ai_vocale():
+    mysound = MySound("regis.wav")
+    text = mysound.recognize()
+    print("analyze = " + text)
+    myreco = MyRecognition()
+    myreco.set_text(text)
+    text, num = myreco.analyze()
+    print("analyze = " + text)
+    global num_commande
+    num_commande = num
+    myspeech = MySpeech(text, "fr")
+    myspeech.speak()
+    
+def get_command_ai():
+    while True:
+        pass
+
 
 FluxVideo = cv.VideoCapture(0)
 if not FluxVideo.isOpened():
@@ -37,8 +63,10 @@ myglass = MyGlass()
 mytracker = MyTracker(7)
 myball = MyBall(50, 50, 640, 480)
 
+aivocal = False
+qai = queue.Queue()
 face_active = False
-its_regis = False
+
 sobel = False
 sobelinv = False
 sobelfilter = 0
@@ -64,7 +92,7 @@ while 1:
 
     imgrgb = imgbgr#cv.cvtColor(imgbgr, cv.COLOR_BGR2RGB)
     imgbgr640x480 = cv.resize(imgrgb, (640, 480))
-    cv.putText(imgbgr640x480, "space identifier esc sortir", (10,460), cv.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 1, cv.LINE_4)
+    cv.putText(imgbgr640x480, "b vocal esc sortir", (10,460), cv.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 1, cv.LINE_4)
     if its_regis:
         cv.putText(imgbgr640x480, "C'est Regis", (10,50), cv.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2, cv.LINE_4)
 
@@ -107,6 +135,7 @@ while 1:
         imgbgr640x480 = h.get_edges()
 
     if colorf:
+        #print("col " + str(color_filter))
         if color_filter == 0:
             cf = ColorFilter(imgbgr640x480)
             imgbgr640x480 = cf.get_red_filter()
@@ -191,3 +220,31 @@ while 1:
     elif Key == 100:
         t1 = threading.Thread(target=qui_cest)
         t1.start()
+
+    elif Key == 98:
+        aivocal = True
+        t1 = threading.Thread(target=ai_vocale)
+        t1.start()
+
+    if num_commande != "":
+        print("num " + str(num_commande))
+        if num_commande == "jeu":
+            tracker = True
+            game = True
+        elif num_commande == "sobeln":
+            sobel = True
+            sobelinv = False
+        elif num_commande == "sobelbl":
+            sobel = True
+            sobelinv = True
+        elif num_commande == "colvert":
+            colorf = True
+            color_filter = 1
+        elif num_commande == "colrouge":
+            colorf = True
+            color_filter = 0
+        elif num_commande == "colbleu":
+            colorf = True
+            color_filter = 2
+
+        num_commande = ""

@@ -103,6 +103,9 @@ class MyNetwork:
         plt.title('Training and Validation Loss')
         plt.show()
 
+    def summary(self):
+        self.model.summary()
+
     def save_model(self,path):
         self.model.save(path)
 
@@ -170,4 +173,5 @@ mynet.save_model("model/regismodel")
 
 """
 mynet.load_model("model/regismodel")
+#mynet.summary()
 mynet.predict("image/test.png")

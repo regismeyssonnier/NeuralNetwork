@@ -33,9 +33,12 @@ class MyAudio:
         self.filenames = tf.io.gfile.glob(str(self.data_dir) + '/*/*')
         self.filenames = tf.random.shuffle(self.filenames)
         self.num_samples = len(self.filenames)
-
-        self.train_files = self.filenames[:40]
-        self.val_files = self.filenames[40: 10]
+       
+        #/!\-------------------------------------------/!\
+        #[(+)]don't forget to adapt the number of file [(+)]
+        #/!\-------------------------------------------/!\
+        self.train_files = self.filenames[:55]
+        self.val_files = self.filenames[55: 10]
         self.test_files = self.filenames[-10:]
         
         self.files_ds = tf.data.Dataset.from_tensor_slices(self.train_files)

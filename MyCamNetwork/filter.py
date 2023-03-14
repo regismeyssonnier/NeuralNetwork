@@ -10,7 +10,7 @@ class ColorFilter:
         self.img = img
 
 
-    def get_red_filter(self):
+    def get_blue_filter(self):
         
         for i in range(480):
                 for j in range(640):
@@ -28,7 +28,7 @@ class ColorFilter:
    
         return self.img
 
-    def get_blue_filter(self):
+    def get_red_filter(self):
         
         for i in range(480):
                 for j in range(640):

@@ -64,8 +64,9 @@ class MyTracker:
         
         # Update tracker
         ok, self.bounding_box = self.tracker.update(frame)
-        self.v = Vector(self.bounding_box[0] - self.lpos.x, self.bounding_box[1] - self.lpos.y)
-
+        if self.bounding_box[0] != self.lpos.x and self.bounding_box[1] != self.lpos.y:
+            self.v = Vector(self.bounding_box[0] - self.lpos.x, self.bounding_box[1] - self.lpos.y)
+        
         # Draw bounding box
         if ok:
             # Tracking success
