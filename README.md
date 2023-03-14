@@ -2,7 +2,7 @@
 
 ## 1. Neural Network 
 
-Neural network who  detects if it's a ***muffin or chihuahua***. 🍪 🐶
+Neural network who  detects if it's a ***muffin or chihuahua or something else up to 4 classes in the actual code***. 🍪 🐶
 
 Neural network qui détecte si c'est un chihuahua ou un muffin.
 
