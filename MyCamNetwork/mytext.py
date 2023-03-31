@@ -170,8 +170,8 @@ def get_string_labels(predicted_scores_batch):
   return predicted_labels
 
 inputs = [
-    "enculer",
-    "salope",
+    "bonjour",
+    "faire",
     "je te connais"
 ]
 predicted_scores = export_model.predict(inputs)

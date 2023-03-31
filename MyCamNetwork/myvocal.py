@@ -19,7 +19,7 @@ class MyVocal:
         self.seed = 42
         self.AUTOTUNE = tf.data.AUTOTUNE
 
-        self.classes = ['commande', 'connaitre', 'faire', 'insulte']        
+        self.classes = ['commande', 'connaitre', 'faire', 'autre']        
 
     def init_model(self):
 
@@ -192,8 +192,6 @@ myvocal = MyVocal(32)
 #myvocal.create_model()
 #myvocal.save_model("model/vocalmodel")
 myvocal.load_model("model/vocalmodel")
-myvocal.predict("enculer")
-print(myvocal.predict_one("niquer un cul"))
 myvocal.predict("on debute une partie")
 myvocal.predict("met le filtre sobel")
 myvocal.predict("je te connais")
