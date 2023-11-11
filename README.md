@@ -38,3 +38,9 @@ There is also an implementation of a neural network in cpp. It manages by batch 
 ***Add your own model to detect you with tensorflow !!!!!!!!***
 
 (Look at the wiki)[https://github.com/regismeyssonnier/NeuralNetwork/wiki/MyCamNetwork]
+
+## 6. NNPro.py able to detect a cross or a cercle in an image
+
+It's almost magic, it's a Neural Network which detects the image cross and circle at 100% in the folder Test.
+
+The file best10.txt are a save of the NN with 100% detection score. You can create your own.
