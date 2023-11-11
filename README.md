@@ -6,9 +6,9 @@ Neural network who  detects if it's a ***muffin or chihuahua or something else u
 
 Neural network qui détecte si c'est un chihuahua ou un muffin.
 
-- 🏃 Run **neuralnetsgame.py** to execute the neural network
+- 🏃 Run **NNProK.py** to execute the neural network
 
-- ⏯️ Lancez **neuralnetsgame.py** pour exécuter le réseau de neurone. .
+- ⏯️ Lancez **NNProK.py** pour exécuter le réseau de neurone. .
 
         The best version 👽
         
