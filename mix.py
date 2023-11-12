@@ -19,7 +19,10 @@ testm = "archive/test/muffin/muffin."
 trainc ="archive/test/chihuahuasel/chihuahua." 
 trainm ="archive/test/muffinsel/muffin." 
 trains ="archive/flowers/flower_photos/sunflowers/sun."
-trains ="Me/image/copy/regis/regis."
+trainrg ="Me/image/copy/regis/regis."
+
+testcr = "Test/croix"
+testce = "Test/cercle"
 
 PATH = [testc, testm]
 PN = []
@@ -67,7 +70,28 @@ def load_img_batch(numimg):
         incN+=1
 
     for i in range(numimg):
-        path2.append(testm + str(NUM2[incN2]) + ".jpg")
+        path2.append(trainrg + str(NUM2[incN2]) + ".jpg")
+        pn2.append(2)
+        incN2+=1
+
+    return path1, pn1, path2 ,pn2
+
+def load_img_batch_CrC(numimg):
+
+    NUM = list(range(1,6))
+    NUM2 = list(range(1,6))
+    incN = incN2 = 0
+    pn1 = []
+    path1 = []
+    pn2 = []
+    path2 = []
+    for i in range(numimg):
+        path1.append(testcr + str(NUM[incN]) + ".png")
+        pn1.append(1)
+        incN+=1
+
+    for i in range(numimg):
+        path2.append(testce + str(NUM2[incN2]) + ".png")
         pn2.append(2)
         incN2+=1
 
@@ -88,7 +112,7 @@ def load_img_batch_sun(numimg):
         incN+=1
 
     for i in range(numimg):
-        path2.append(trains + str(NUM2[incN2]) + ".jpg")
+        path2.append(trainrg + str(NUM2[incN2]) + ".jpg")
         pn2.append(2)
         incN2+=1
 
@@ -113,7 +137,7 @@ def load_img_batch_3(numimg):
         incN+=1
 
     for i in range(numimg):
-        path2.append(trains + str(NUM2[incN2]) + ".jpg")
+        path2.append(trainrg + str(NUM2[incN2]) + ".jpg")
         pn2.append(2)
         incN2+=1
 
@@ -137,7 +161,7 @@ def load_img_batch50(numimg):
         incN+=1
 
     for i in range(numimg):
-        path2.append(trainm + str(incN2) + ".jpg")
+        path2.append(trainrg + str(incN2) + ".jpg")
         pn2.append(2)
         incN2+=1
 
