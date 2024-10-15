@@ -132,7 +132,7 @@ begin
      end
      else
      begin
-         np1 := Init_Player(indc, indices, 64);
+         np1 := Init_Player(2, indices, 64);
          numa[indi] := 2;
          indc := indc + 1;
      end;
@@ -147,7 +147,7 @@ begin
      end
      else
      begin
-         np2 := Init_Player(indc, indices, 63);
+         np2 := Init_Player(2, indices, 63);
          numa[indi] := 2;
          indc := indc + 1;
      end;
@@ -162,7 +162,7 @@ begin
      end
      else
      begin
-         np3 := Init_Player(indc, indices, 62);
+         np3 := Init_Player(2, indices, 62);
          numa[indi] := 2;
          indc := indc + 1;
      end;
@@ -269,10 +269,12 @@ end;
 function MadKnight.step(action: Integer; var done : Integer): Double;
 var
     reward: Double;
-    numpl, x, y, ind_action, res, i, xx, yy, rest, indi: Integer;
+    numpl, _numpl, x, y, ind_action, res, i, xx, yy, rest, indi, mv, mv2: Integer;
     max_score, max_score_zarma, opp_score: Double;
     dir: array[0..7, 0..1] of Integer;
-    nb : Integer;
+    nb, mnb : Integer;
+    move: array[0..100] of Integer;
+    ind_move : Integer;
 
 begin
     reward := 0;
@@ -321,6 +323,15 @@ begin
         opp_score := 0;
         nb := 0;
         GetPossibleMove(numpl, nb);
+
+        for i := 0 to pind_move-1 do
+        begin
+             move[i] := pmove[i];
+        end;
+        ind_move := pind_move;
+
+
+
         
         if np = 1 then
         begin
@@ -347,24 +358,108 @@ begin
 
         end;
 
-        if myp = 0 then
+        mnb := nb;
+        if (myp = 0) and (np = 1) then
         begin
-             opp_score := opp_score + GetBestMove(g, np2);
-             opp_score := opp_score + GetBestMove(g, np3);
+             nb := 0;
+             GetPossibleMove(np2, nb);
+             for i := 0 to pind_move-1 do
+             begin
+                  x := np2 mod 8;
+                  y := np2 div 8;
+                  mv := ((y + dir[pmove[i],1]) * 8) + (x + dir[pmove[i],0]);
+
+                       if mv = numpl then
+                       begin
+                            mnb := mnb + 1;
+                       end;
+
+             end;
+
+             GetPossibleMove(np3, nb);
+             for i := 0 to pind_move-1 do
+             begin
+                  x := np3 mod 8;
+                  y := np3 div 8;
+                  mv := ((y + dir[pmove[i],1]) * 8) + (x + dir[pmove[i],0]);
+
+                       if mv = numpl then
+                       begin
+                            mnb := mnb + 1;
+                       end;
+
+             end;
+
+
+
         end
-        else if myp = 1 then
+        else if (myp = 1) and (np = 2) then
         begin
-             opp_score := opp_score + GetBestMove(g, np1);
-             opp_score := opp_score + GetBestMove(g, np3);
+             nb := 0;
+             GetPossibleMove(np1, nb);
+             for i := 0 to pind_move-1 do
+             begin
+                  x := np1 mod 8;
+                  y := np1 div 8;
+                  mv := ((y + dir[pmove[i],1]) * 8) + (x + dir[pmove[i],0]);
+
+                       if mv = numpl then
+                       begin
+                            mnb := mnb + 1;
+                       end;
+
+             end;
+
+             GetPossibleMove(np3, nb);
+             for i := 0 to pind_move-1 do
+             begin
+                  x := np3 mod 8;
+                  y := np3 div 8;
+                  mv := ((y + dir[pmove[i],1]) * 8) + (x + dir[pmove[i],0]);
+
+                       if mv = numpl then
+                       begin
+                            mnb := mnb + 1;
+                       end;
+
+             end;
+
         end
-        else if myp = 2 then
+        else if (myp = 2) and (np = 3) then
         begin
-             opp_score := opp_score + GetBestMove(g, np1);
-             opp_score := opp_score + GetBestMove(g, np2);
+             nb := 0;
+             GetPossibleMove(np1, nb);
+             for i := 0 to pind_move-1 do
+             begin
+                  x := np1 mod 8;
+                  y := np1 div 8;
+                  mv := ((y + dir[pmove[i],1]) * 8) + (x + dir[pmove[i],0]);
+
+                       if mv = numpl then
+                       begin
+                            mnb := mnb + 1;
+                       end;
+
+             end;
+
+             GetPossibleMove(np2, nb);
+             for i := 0 to pind_move-1 do
+             begin
+                  x := np2 mod 8;
+                  y := np2 div 8;
+                  mv := ((y + dir[pmove[i],1]) * 8) + (x + dir[pmove[i],0]);
+
+                       if mv = numpl then
+                       begin
+                            mnb := mnb + 1;
+                       end;
+
+             end;
         end;
 
-
-        reward := 1.0;//(float(nb) * 2.0 - opp_score/2.0) / 16.0;
+        x := numpl mod 8;
+        y := numpl div 8;
+        reward := float(mnb) + (abs(x - 3.5) + abs(y - 3.5));//(float(nb) - opp_score*0.5) / 8.0;
         //Write(reward);
         //reward := reward - (1.0 - (max_score / max_score_zarma)) * 0.1;
     end
@@ -418,21 +513,21 @@ begin
 
     end;
 
-    {if done = 0 then
+    if done = 0 then
     begin
-        if (np = 1) and (np2 = -1) and (np3 = -1) then
+        if (np = 1) and (myp = np-1) and (np2 = -1) and (np3 = -1) then
         begin
             reward := 1;
             done := 1;
         end;
 
-        if (np = 2) and (np1 = -1) and (np3 = -1) then
+        if (np = 2) and (myp = np-1) and (np1 = -1) and (np3 = -1) then
         begin
             reward := 1;
             done := 1;
         end;
 
-        if (np = 3) and (np1 = -1) and (np2 = -1) then
+        if (np = 3) and (myp = np-1) and (np1 = -1) and (np2 = -1) then
         begin
             reward := 1;
             done := 1;
@@ -443,7 +538,7 @@ begin
             reward := -1;
             done := 1;
         end;
-    end;  }
+    end;
 
     np := np + 1;
     if np = 4 then
@@ -485,6 +580,7 @@ Type
     procedure SaveWeight();
     procedure LoadSaveWeight();
     procedure SaveBestNN(fn: string);
+    procedure SaveBestNNN(fn: string);
     constructor Create(dim : array of Integer; sz : Integer; _lr : Double);
     procedure SetInput(inp : array of double);
     procedure SetEtiquette(et : array of double);
@@ -1084,6 +1180,59 @@ begin
     CloseFile(f);
 end;
 
+procedure NN.SaveBestNNN(fn: string);
+var
+    f: TextFile;
+    i, j, k: Integer;
+
+begin
+    AssignFile(f, fn);
+    Rewrite(f);
+    DecimalSeparator := '.';
+
+    Write(f, '{');
+    for i := 0 to maxdim-2 do
+    begin
+        Write(f, '/* weight layer ', i, '*/', #13#10);
+        Write(f, '{');
+        for j := 0 to dimnn[i]-1 do
+        begin
+            Write(f, '{');
+            for k := 0 to dimnn[i+1]-1 do
+            begin
+                Write(f, FloatToStrf(network_w[i][j][k], ffFixed, 7, 6));
+                if k < dimnn[i+1]-1 then
+                    Write(f, ',');
+            end;
+            Write(f, '}');
+            if j < dimnn[i]-1 then
+                Write(f, ',');
+        end;
+        Write(f, '}');
+        if i < maxdim-2 then
+            Write(f, ',' + #13#10);
+    end;
+    Write(f, '},' + #13#10 + '{');
+
+    for j := 0 to maxdim-2 do
+    begin
+        Write(f, '/*layer bias : */', #13#10);
+        Write(f, '{');
+        for k := 0 to dim[j+1]-1 do
+        begin
+            Write(f, FloatToStrf(network_b[j][k], ffFixed, 7, 6));
+            if k < dim[j+1]-1 then
+                Write(f, ',');
+        end;
+        Write(f, '}');
+        if j < maxdim-2 then
+            Write(f, ',' + #13#10);
+    end;
+    Write(f, '}' + #13#10);
+
+    CloseFile(f);
+end;
+
 
 procedure NN.TrainXOR();
 var
@@ -1180,14 +1329,16 @@ procedure NN.TrainMad();
 var
    state: array[0..64] of Double;
    action, correct_action, i, j,l, fr,  episode, ind_state, done, x: Integer;
-   total_reward, reward, maxr, meanr: Double;
+   total_reward, reward, maxr, meanr, dv: Double;
    f: TextFile;
+   is_our_turn : boolean;
 
 
 begin
    epsilon := INITIAL_EPSILON; // Initialiser epsilon pour la stratégie e-greedy
    maxr := -2000000000;
    meanr := 0;
+   dv := 1;
    mad := MadKnight.Create();
    SaveWeight();
 
@@ -1195,7 +1346,7 @@ begin
     Rewrite(f);
 
 
-   for episode := 0 to 10000 do // Nombre d'épisodes d'entraînement
+   for episode := 0 to 100000 do // Nombre d'épisodes d'entraînement
    begin
       // WriteLn(f, 'episode=' + inttostr(episode));
        //flush(f);
@@ -1213,21 +1364,31 @@ begin
       while done = 0 do // Boucle sur les exemples XOR
       begin
 
+          if ((mad.myp+1) = mad.np) then
+          begin
+               is_our_turn := true;
+          end
+          else
+          begin
+               is_our_turn := false;
+
+          end;
+
          ind_state := 0;
          if (mad.np = 1) and (mad.np1 <> -1) then
          begin
-              state[ind_state] := mad.numa[mad.np-1] / 63.0;
+              state[ind_state] := mad.np1 / 63.0;
               ind_state := ind_state + 1;
 
          end
          else if (mad.np = 2) and (mad.np2 <> -1) then
          begin
-              state[ind_state] := mad.numa[mad.np-1] / 63.0;
+              state[ind_state] := mad.np2 / 63.0;
               ind_state := ind_state + 1;
          end
          else if (mad.np = 3) and (mad.np3 <> -1) then
          begin
-              state[ind_state] := mad.numa[mad.np-1] / 63.0;
+              state[ind_state] := mad.np3 / 63.0;
               ind_state := ind_state + 1;
 
          end
@@ -1240,7 +1401,7 @@ begin
 
          for i := 0 to 63 do
          begin
-              state[ind_state] := mad.g[i] / 4.0;
+              state[ind_state] := mad.g[i] / 5.0;
               ind_state := ind_state + 1;
          end;
          
@@ -1257,7 +1418,10 @@ begin
          //WriteLn(f, 'done=' + inttostr(done));
        //flush(f);
          //WriteLn(reward);
-         total_reward := total_reward + reward;
+         if is_our_turn then
+         begin
+              total_reward := total_reward + reward;
+
 
          // Mise à jour des coûts pour le backward
          for j := 0 to dimnn[maxdim-1]-1 do
@@ -1275,7 +1439,10 @@ begin
          end;
 
          // Rétropropagation de l'erreur via BackwardNN
-         BackwardNNA();
+
+              BackwardNNA();
+         end; //end is_our_turn
+
          //WriteLn(f, 'backward=' + inttostr(done));
        //flush(f);
       end;  // end done
@@ -1294,9 +1461,10 @@ begin
       //end
       end;
 
-      if ((episode mod 100) = 0) then
-         WriteLn('Episode ', episode, ' Total Reward: ', FloatToStr(total_reward), '/', FloatToStr(maxr), ' mean=', FloatToStr(meanr/ float(episode+1)));
+      if ((episode mod 1000) = 0) then
+         WriteLn('Episode ', episode, ' Total Reward: ', FloatToStr(total_reward), '/', FloatToStr(maxr), ' mean=', FloatToStr(meanr/ float(dv)), ' total_rew :', meanr);
 
+         dv :=dv + 1;
       // Mise à jour du taux d'exploration
       UpdateEpsilon();
 
@@ -1450,6 +1618,7 @@ begin
       nnz := nn.Create(dim, 3, 0.001);
       nnz.TrainMad();
       nnz.SaveBestNN('C:\Users\regis\Documents\Pascal\RL\best_w.txt');
+      nnz.SaveBestNNN('C:\Users\regis\Documents\Pascal\RL\best_wn.txt');
                         
      readkey;
 
