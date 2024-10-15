@@ -53,6 +53,14 @@ end;}
 
 // end Allocate mem
 
+type
+  TransitionMad = record
+    state_t: array[0..64] of double;   { Etat actuel }
+    action_t: integer;              { Action prise }
+    reward_t: real;                 { Récompense }
+    next_state_t: array[0..64] of double; { Etat suivant }
+  end;
+
 Type
     MadKnight = class
     public
@@ -376,6 +384,9 @@ begin
 
              end;
 
+             opp_score := opp_score + nb;
+
+             nb := 0;
              GetPossibleMove(np3, nb);
              for i := 0 to pind_move-1 do
              begin
@@ -389,6 +400,8 @@ begin
                        end;
 
              end;
+
+             opp_score := opp_score + nb;
 
 
 
@@ -409,7 +422,9 @@ begin
                        end;
 
              end;
+             opp_score := opp_score + nb;
 
+             nb := 0;
              GetPossibleMove(np3, nb);
              for i := 0 to pind_move-1 do
              begin
@@ -423,6 +438,8 @@ begin
                        end;
 
              end;
+
+             opp_score := opp_score + nb;
 
         end
         else if (myp = 2) and (np = 3) then
@@ -442,6 +459,9 @@ begin
 
              end;
 
+             opp_score := opp_score + nb;
+
+             nb := 0;
              GetPossibleMove(np2, nb);
              for i := 0 to pind_move-1 do
              begin
@@ -455,11 +475,13 @@ begin
                        end;
 
              end;
+
+             opp_score := opp_score + nb;
         end;
 
         x := numpl mod 8;
         y := numpl div 8;
-        reward := float(mnb) + (abs(x - 3.5) + abs(y - 3.5));//(float(nb) - opp_score*0.5) / 8.0;
+        reward := (float(mnb)*10.0 - (abs(x - 3.5) + abs(y - 3.5))) - (opp_score / 2.0);
         //Write(reward);
         //reward := reward - (1.0 - (max_score / max_score_zarma)) * 0.1;
     end
@@ -568,10 +590,13 @@ Type
     Mad : MadKnight;
   
     network_w, bnetwork_w, m_w, v_w: array[0..10, 0..512, 0..512]of double;
-    network, network_b, bnetwork_b, m_b, v_b, results: array[0..10, 0..512]of double;
+    network, bnetwork,  network_b, bnetwork_b, m_b, v_b, results: array[0..10, 0..512]of double;
     etiquette: array[0..512] of double;
     dimnn : array[0..20] of Integer;
     maxdim :Integer;
+    replay : array[0..200] of TransitionMad;
+    max_replay : Integer;
+    index_add_replay : INteger;
 
     procedure ForwardNN();
     procedure BackwardNN();
@@ -579,6 +604,8 @@ Type
     procedure PredictNN();
     procedure SaveWeight();
     procedure LoadSaveWeight();
+    procedure SaveNetwork();
+    procedure LoadNetwork();
     procedure SaveBestNN(fn: string);
     procedure SaveBestNNN(fn: string);
     constructor Create(dim : array of Integer; sz : Integer; _lr : Double);
@@ -630,6 +657,9 @@ begin
   epsilon2 := 0.00000001;
   LR := _lr;
   epoch := 0;
+
+  max_replay:=0;
+  index_add_replay := 0;
 
   WriteLN(inttostr(dimnn[0]));
 
@@ -1127,6 +1157,38 @@ begin
      end;
 end;
 
+procedure NN.SaveNetwork();
+var
+   i,j : Integer;
+begin
+     for i := 0 to maxdim - 1 do
+     begin
+          for j := 0 to dimnn[i]-1 do
+          begin
+               bnetwork[i, j] := network[i, j];
+          end
+
+     end;
+
+
+end;
+
+procedure NN.LoadNetwork();
+var
+   i,j : Integer;
+begin
+     for i := 0 to maxdim - 1 do
+     begin
+          for j := 0 to dimnn[i]-1 do
+          begin
+               network[i, j] := bnetwork[i, j];
+          end
+
+     end;
+
+
+end;
+
 procedure NN.SaveBestNN(fn: string);
 var
     f: TextFile;
@@ -1271,7 +1333,7 @@ begin
             if j = action then
             begin
                  fr := ArgMax();
-                 cost[j] :=  network[maxdim-1, j] + (-reward + 0.95 *  network[maxdim-1, fr]-network[maxdim-1, j])   ;
+                 cost[j] :=  (-reward + 0.95 *  network[maxdim-1, fr])   ;
             end
             else
             begin
@@ -1328,13 +1390,26 @@ end;
 procedure NN.TrainMad();
 var
    state: array[0..64] of Double;
-   action, correct_action, i, j,l, fr,  episode, ind_state, done, x: Integer;
-   total_reward, reward, maxr, meanr, dv: Double;
+   saveg : array[0..63] of double;
+   dir: array[0..7, 0..1] of Integer;
+   action, actions, correct_action, i, j,l, fr,  episode, ind_state, done,dones, x, y, numpl, nb, mv: Integer;
+   total_reward, reward, maxr, meanr, dv, vmax, vala: Double;
    f: TextFile;
    is_our_turn : boolean;
+   transition : TransitionMad;
 
 
 begin
+
+     dir[0,0] := -2; dir[0,1] := 1;
+    dir[1,0] := -2; dir[1,1] := -1;
+    dir[2,0] := -1; dir[2,1] := -2;
+    dir[3,0] := 1;  dir[3,1] := -2;
+    dir[4,0] := 2;  dir[4,1] := -1;
+    dir[5,0] := 2;  dir[5,1] := 1;
+    dir[6,0] := 1;  dir[6,1] := 2;
+    dir[7,0] := -1; dir[7,1] := 2;
+
    epsilon := INITIAL_EPSILON; // Initialiser epsilon pour la stratégie e-greedy
    maxr := -2000000000;
    meanr := 0;
@@ -1346,9 +1421,9 @@ begin
     Rewrite(f);
 
 
-   for episode := 0 to 100000 do // Nombre d'épisodes d'entraînement
+   for episode := 0 to 10000 do // Nombre d'épisodes d'entraînement
    begin
-      // WriteLn(f, 'episode=' + inttostr(episode));
+       //WriteLn(f, 'episode=' + inttostr(episode));
        //flush(f);
 
       for x:= 0 to 2 do
@@ -1367,81 +1442,209 @@ begin
           if ((mad.myp+1) = mad.np) then
           begin
                is_our_turn := true;
+
+               //action 1
+               ind_state := 0;
+
+              if mad.np = 1 then
+              begin
+                   numpl := mad.np1;
+              end
+              else if mad.np = 2 then
+              begin
+                   numpl := mad.np2;
+              end
+              else if mad.np = 3 then
+              begin
+                   numpl := mad.np3;
+              end;
+
+              state[ind_state] := numpl / 63.0;
+              ind_state := ind_state + 1;
+
+
+              for i := 0 to 63 do
+              begin
+                   state[ind_state] := mad.g[i] / 5.0;
+                   ind_state := ind_state + 1;
+              end;
+
+              for i:= 0 to 64 do
+              begin
+                   transition.state_t[i] := state[i];
+
+              end;
+
+
+         
+         // Sélection de l'action (0 ou 1) selon la stratégie e-greedy
+         actions := SelectActionMd(state);
+         transition.action_t := actions;
+
+         vala := network[maxdim-1, actions];
+
+         reward := mad.step(actions, done);
+         total_reward := total_reward + reward;
+
+         transition.reward_t := reward;
+
+         SaveNetwork();
+
+
+
+          for i := 0 to 63 do
+          begin
+              saveg[i] := mad.g[i];
+          end;
+
+              //action 2
+
+              if  mad.myp = 0 then
+              begin
+                   numpl := mad.np1;
+              end
+              else if  mad.myp = 1 then
+              begin
+                   numpl := mad.np2;
+              end
+              else if  mad.myp = 2 then
+              begin
+                   numpl := mad.np3;
+              end;
+
+              ind_state := 0;
+
+              state[ind_state] := numpl / 63.0;
+              ind_state := ind_state + 1;
+
+
+              for i := 0 to 63 do
+              begin
+                   state[ind_state] := mad.g[i] / 5.0;
+                   ind_state := ind_state + 1;
+              end;
+
+              for i:= 0 to 64 do
+              begin
+                   transition.next_state_t[i] := state[i];
+
+              end;
+
+              replay[index_add_replay] := transition;
+              if max_replay < 200 then
+                 max_replay := max_replay+1;
+
+              index_add_replay := index_add_replay + 1;
+              if index_add_replay = 200 then
+                 index_add_replay := 0;
+
+              fr := SelectActionMd(state);
+              vmax := network[maxdim-1, fr];
+
+              {for i := 0 to 63 do
+              begin
+                   mad.g[i] := saveg[i];
+              end;}
+
+              for j := 0 to dimnn[maxdim-1]-1 do
+              begin
+                   if j = actions then
+                   begin
+                        cost[j] :=  1.1 * (-2.0*reward + 0.95 * vmax + vala);
+                   end
+                   else
+                   begin
+                        cost[j] :=  0.0;
+                   end;
+              end;
+
+              LoadNetwork();
+                   // Rétropropagation de l'erreur via BackwardNN
+
+              BackwardNNA();
+
+              if max_replay > 30 then
+              begin
+                   for i := 0 to 29 do
+                   begin
+
+                      transition := replay[Random(max_replay)];
+                      SelectActionMd(transition.state_t);
+                      vala := network[maxdim-1, transition.action_t];
+
+                       SaveNetwork();
+
+                       fr := SelectActionMd(transition.next_state_t);
+                       vmax := network[maxdim-1, fr];
+
+                   // Mise à jour des coûts pour le backward
+                      for j := 0 to dimnn[maxdim-1]-1 do
+                      begin
+                           if j = transition.action_t then
+                           begin
+                                cost[j] := 0.5 * (-2.0*transition.reward_t + 0.95 * vmax + vala);
+                           end
+                           else
+                           begin
+                                cost[j] :=  0.0;
+                           end;
+                      end;
+
+                      LoadNetwork();
+                   // Rétropropagation de l'erreur via BackwardNN
+
+                      BackwardNNA();
+
+                   end;
+
+               end;
+
           end
           else
           begin
                is_our_turn := false;
+               if mad.np = 1 then
+               begin
+                   numpl := mad.np1;
+               end
+               else if mad.np = 2 then
+               begin
+                   numpl := mad.np2;
+               end
+               else if mad.np = 3 then
+               begin
+                   numpl := mad.np3;
+               end;
+               mv := mad.GetPossibleMove(numpl, nb);
+               if mv = -1 then
+                  mv := Random(8);
+               reward := mad.step(mv, done);
+
+               if done = 1 then
+                  break;
+
+               if mad.np = 1 then
+               begin
+                   numpl := mad.np1;
+               end
+               else if mad.np = 2 then
+               begin
+                   numpl := mad.np2;
+               end
+               else if mad.np = 3 then
+               begin
+                   numpl := mad.np3;
+               end;
+               mv := mad.GetPossibleMove(numpl, nb);
+               if mv = -1 then
+                  mv := Random(8);
+               reward := mad.step(mv, done);
 
           end;
 
-         ind_state := 0;
-         if (mad.np = 1) and (mad.np1 <> -1) then
-         begin
-              state[ind_state] := mad.np1 / 63.0;
-              ind_state := ind_state + 1;
-
-         end
-         else if (mad.np = 2) and (mad.np2 <> -1) then
-         begin
-              state[ind_state] := mad.np2 / 63.0;
-              ind_state := ind_state + 1;
-         end
-         else if (mad.np = 3) and (mad.np3 <> -1) then
-         begin
-              state[ind_state] := mad.np3 / 63.0;
-              ind_state := ind_state + 1;
-
-         end
-         else
-         begin
-
-              state[ind_state] := 0;
-              ind_state := ind_state + 1;
-         end;
-
-         for i := 0 to 63 do
-         begin
-              state[ind_state] := mad.g[i] / 5.0;
-              ind_state := ind_state + 1;
-         end;
-         
-         // Sélection de l'action (0 ou 1) selon la stratégie e-greedy
-         action := SelectActionMd(state);
-
-        // WriteLn(f, 'action=' + inttostr(action));
-      // flush(f);
-
-         //WriteLn('action=' + inttostr(action));
-
-         reward := mad.step(action, done);
-
-         //WriteLn(f, 'done=' + inttostr(done));
-       //flush(f);
-         //WriteLn(reward);
-         if is_our_turn then
-         begin
-              total_reward := total_reward + reward;
 
 
-         // Mise à jour des coûts pour le backward
-         for j := 0 to dimnn[maxdim-1]-1 do
-         begin
-            if j = action then
-            begin
-                 fr := ArgMax();
-                 cost[j] :=  network[maxdim-1, j] + (-reward + 0.95 *  network[maxdim-1, fr]-network[maxdim-1, j])   ;
-            end
-            else
-            begin
-                 cost[j] :=  0.0;
-            end;
 
-         end;
-
-         // Rétropropagation de l'erreur via BackwardNN
-
-              BackwardNNA();
-         end; //end is_our_turn
 
          //WriteLn(f, 'backward=' + inttostr(done));
        //flush(f);
